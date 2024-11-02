@@ -14,52 +14,100 @@ class SemanticHighlighter:
         nltk.download("punkt", quiet=True)
 
     def highlight_text(self, query: str, source: str, max_length: int = 500) -> str:
-        """Main method to highlight sentences in the source based on similarity to the query.
+        """Highlight sentences in the source text based on their similarity to the query.
 
         Args:
-        - query: The search query string.
-        - source: The source text to highlight.
-        - max_length: Maximum length of the returned highlighted text.
+            query: The search query string.
+            source: The source text to highlight.
+            max_length: Maximum length of the returned highlighted text.
 
         Returns:
-        - HTML string with highlighted sentences based on similarity.
-
+            HTML string with highlighted sentences based on similarity.
         """
         sentences = self._split_sentences(source)
         similarities = self._compute_similarities(query, sentences)
         selected_indices = self._select_trimmed_sentences(sentences, similarities, max_length)
         return self._apply_markup(sentences, similarities, selected_indices)
 
+    def highlight_multiple(self, query: str, sources: list[str], max_length: int = 500) -> list[str]:
+        """Highlight sentences in multiple source texts based on their similarity to the query.
+
+        Args:
+            query: The search query string.
+            sources: List of source texts to highlight.
+            max_length: Maximum length of the returned highlighted text for each source.
+
+        Returns:
+            List of HTML strings with highlighted sentences for each source.
+        """
+        # Split sentences from all sources and keep track of indices
+        all_sentences = []
+        source_sentence_indices = []
+        start_idx = 0
+
+        for source in sources:
+            sentences = self._split_sentences(source)
+            all_sentences.extend(sentences)
+            end_idx = start_idx + len(sentences)
+            source_sentence_indices.append((start_idx, end_idx))
+            start_idx = end_idx
+
+        # Encode query and all sentences together
+        all_texts = [query, *all_sentences]
+        embeddings = self.model.encode(all_texts)
+        query_embedding = embeddings[0]
+        sentence_embeddings = embeddings[1:]
+        similarities = cosine_similarity([query_embedding], sentence_embeddings).flatten()
+
+        # Process each source separately
+        results = []
+        for start, end in source_sentence_indices:
+            sentences_slice = all_sentences[start:end]
+            similarities_slice = similarities[start:end]
+            selected_indices = self._select_trimmed_sentences(sentences_slice, similarities_slice, max_length)
+            result = self._apply_markup(sentences_slice, similarities_slice, selected_indices)
+            results.append(result)
+
+        return results
+
     def _split_sentences(self, text: str) -> list[str]:
-        """Tokenize the input text into sentences."""
+        """Tokenize the input text into sentences.
+
+        Args:
+            text: The text to split into sentences.
+
+        Returns:
+            A list of sentences.
+        """
         return sent_tokenize(text)
 
     def _compute_similarities(self, query: str, sentences: list[str]) -> np.ndarray:
-        """Compute cosine similarity between query and each sentence in the list.
+        """Compute cosine similarity between the query and each sentence in the list.
 
         Args:
-        - query: Query string to compare against each sentence.
-        - sentences: List of sentences to compute similarity with.
+            query: Query string to compare against each sentence.
+            sentences: List of sentences to compute similarity with.
 
         Returns:
-        - Numpy array of similarity scores.
-
+            Numpy array of similarity scores.
         """
-        query_embedding = self.model.encode([query])
-        sentence_embeddings = self.model.encode(sentences)
-        return cosine_similarity(query_embedding, sentence_embeddings)[0]
+        # Encode query and sentences together to call self.model.encode only once
+        all_texts = [query, *sentences]
+        embeddings = self.model.encode(all_texts)
+        query_embedding = embeddings[0]
+        sentence_embeddings = embeddings[1:]
+        return cosine_similarity([query_embedding], sentence_embeddings).flatten()
 
     def _select_trimmed_sentences(self, sentences: list[str], similarities: np.ndarray, max_length: int) -> list[int]:
         """Select indices of sentences around the highest similarity sentence while respecting max_length.
 
         Args:
-        - sentences: List of sentences from the source text.
-        - similarities: Numpy array of similarity scores for each sentence.
-        - max_length: Maximum length of characters for the trimmed text.
+            sentences: List of sentences from the source text.
+            similarities: Numpy array of similarity scores for each sentence.
+            max_length: Maximum length of characters for the trimmed text.
 
         Returns:
-        - List of indices of selected sentences.
-
+            List of indices of selected sentences.
         """
         highest_sim_index = int(np.argmax(similarities))
         selected_indices = [highest_sim_index]
@@ -100,21 +148,16 @@ class SemanticHighlighter:
         selected_indices.sort()
         return selected_indices
 
-    def _apply_markup(
-        self,
-        sentences: list[str],
-        similarities: np.ndarray,
-        selected_indices: list[int],
-    ) -> str:
+    def _apply_markup(self, sentences: list[str], similarities: np.ndarray, selected_indices: list[int]) -> str:
         """Apply HTML markup to the selected sentences.
 
         Args:
-        - sentences: List of all sentences.
-        - similarities: Numpy array of similarity scores for each sentence.
-        - selected_indices: List of indices of sentences to include.
+            sentences: List of all sentences.
+            similarities: Numpy array of similarity scores for each sentence.
+            selected_indices: List of indices of sentences to include.
 
         Returns:
-        - HTML string with marked-up sentences.
+            HTML string with marked-up sentences.
         """
         marked_up_sentences = []
         for idx in selected_indices:

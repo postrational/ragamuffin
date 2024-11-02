@@ -91,8 +91,25 @@ class GradioAgentChatUI(BaseLlamaPack):
         query = chat_history[-1][0]
         response = self.agent.stream_chat(query)
 
-        output = []
-        for source in response.sources:
+        sources_html = self.generate_sources_html(query, response.sources)
+
+        for token in response.response_gen:
+            chat_history[-1][1] += token
+            yield chat_history, str(sources_html)
+
+    def reset_chat(self) -> tuple[str, str, str]:
+        """Reset the agent's chat history. And clear all dialogue boxes."""
+        self.agent.reset()  # clear agent history
+        return "", "", ""
+
+    def generate_sources_html(self, query: str, sources: list) -> str:
+        """Generate HTML for the sources."""
+        output_html = ""
+        sources_text = []
+        nodes_info = []
+
+        # Collect all texts and their associated metadata
+        for source in sources:
             for node_with_score in source.raw_output.source_nodes:
                 text_node = node_with_score.node
                 metadata = text_node.metadata
@@ -101,19 +118,23 @@ class GradioAgentChatUI(BaseLlamaPack):
                 filename = metadata.get("file_name", "Unknown Filename")
                 name = metadata.get("name", filename)
                 url = metadata.get("url")
-                filename = f"<a href='{url}' target='_blank'>{name}</a>" if url else f"<b>{name}</b>"
+                filename_html = f"<a href='{url}' target='_blank'>{name}</a>" if url else f"<b>{name}</b>"
 
-                selected_text = self.semantic_highlighter.highlight_text(query, text_node.text)
-                page = f"<br>Page {page}" if page else ""
-                output.append(f"<p><b>{filename}</b><br>{selected_text}{page}</p>")
+                # Append text and metadata to lists
+                sources_text.append(text_node.text)
+                nodes_info.append(
+                    {
+                        "filename_html": filename_html,
+                        "page": page,
+                    }
+                )
 
-        html_output = "".join(output)
+        # Highlight the texts
+        highlighted_texts = self.semantic_highlighter.highlight_multiple(query, sources_text)
 
-        for token in response.response_gen:
-            chat_history[-1][1] += token
-            yield chat_history, str(html_output)
+        # Construct the output using the highlighted texts and metadata
+        for highlighted_text, info in zip(highlighted_texts, nodes_info, strict=False):
+            page_html = f"<br>Page {info['page']}" if info["page"] else ""
+            output_html += f"<p><b>{info['filename_html']}</b><br>{highlighted_text}{page_html}</p>"
 
-    def reset_chat(self) -> tuple[str, str, str]:
-        """Reset the agent's chat history. And clear all dialogue boxes."""
-        self.agent.reset()  # clear agent history
-        return "", "", ""
+        return output_html
