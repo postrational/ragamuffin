@@ -2,17 +2,12 @@ import logging
 
 import cassio
 from cassandra.cluster import Cluster
-from llama_index.core import StorageContext, VectorStoreIndex
+from llama_index.core import Settings, StorageContext, VectorStoreIndex
 from llama_index.core.indices.base import BaseIndex
 from llama_index.core.readers.base import BaseReader
 from llama_index.vector_stores.cassandra import CassandraVectorStore
 
 logger = logging.getLogger(__name__)
-
-# $ brew install cassandra
-# $ brew services start cassandra
-# $ cqlsh
-# cqlsh> CREATE KEYSPACE zoterochat WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 
 
 class CassandraStorage:
@@ -30,6 +25,8 @@ class CassandraStorage:
         """Load the documents and create a RAG index."""
         documents = reader.load_data()
         storage_context = StorageContext.from_defaults(vector_store=self.vector_store)
+        Settings.chunk_size = 512
+        Settings.chunk_overlap = 50
         index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
         index.storage_context.persist()
         return index

@@ -8,7 +8,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 class SemanticHighlighter:
     def __init__(self) -> None:
         # Load the embedding model
-        model_name = "all-MiniLM-L6-v2"
+        model_name = "all-mpnet-base-v2"
         self.model = SentenceTransformer(model_name)
         # Download the NLTK tokenizer
         nltk.download("punkt", quiet=True)

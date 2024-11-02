@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +28,7 @@ class GradioAgentChatUI(BaseLlamaPack):
         """Run the pipeline."""
         rafamuffin_theme = gr.themes.Soft(
             primary_hue=colors.cyan,
-            secondary_hue=colors.rose,
+            secondary_hue=colors.sky,
             neutral_hue=colors.gray,
             font=(
                 fonts.GoogleFont("Quicksand"),
@@ -40,7 +41,7 @@ class GradioAgentChatUI(BaseLlamaPack):
                 "monospace",
             ),
         )
-        css_filename = Path(__file__).parent / "styles.css"
+        css_filename = Path(__file__).parent / "style.css"
 
         webui = gr.Blocks(
             title="Ragamuffin Chat",
@@ -54,22 +55,29 @@ class GradioAgentChatUI(BaseLlamaPack):
                     gr.Markdown("### Ragamuffin Zotero Chat 🦙")
                     chat_window = gr.Chatbot(label="Conversation")
                     message = gr.Textbox(label="Write A Message")
-                    clear = gr.ClearButton()
+                    with gr.Row():
+                        clear = gr.ClearButton()
+                        submit = gr.Button("Submit", variant="primary")
 
                 # Right Column
                 with gr.Column(scale=1):
                     console = gr.HTML(elem_id="sources")
 
-            message.submit(
-                self.handle_user_message,
-                [message, chat_window],
-                [message, chat_window],
-                queue=False,
-            ).then(
-                self.generate_response,
-                chat_window,
-                [chat_window, console],
-            )
+            def apply_submit_action(component_action: Callable) -> None:
+                component_action(
+                    self.handle_user_message,
+                    inputs=[message, chat_window],
+                    outputs=[message, chat_window],
+                    queue=False,
+                ).then(
+                    self.generate_response,
+                    inputs=chat_window,
+                    outputs=[chat_window, console],
+                )
+
+            # Apply actions
+            apply_submit_action(message.submit)
+            apply_submit_action(submit.click)
             clear.click(self.reset_chat, None, [message, chat_window, console])
 
         webui.launch(server_port=8080, share=False)
@@ -87,10 +95,15 @@ class GradioAgentChatUI(BaseLlamaPack):
         for source in response.sources:
             for node_with_score in source.raw_output.source_nodes:
                 text_node = node_with_score.node
-                filename = text_node.metadata.get("file_name", "Unknown Filename")
-                page = text_node.metadata.get("page_label")
-                text = text_node.text
-                selected_text = self.semantic_highlighter.highlight_text(query, text)
+                metadata = text_node.metadata
+                page = metadata.get("page_label")
+
+                filename = metadata.get("file_name", "Unknown Filename")
+                name = metadata.get("name", filename)
+                url = metadata.get("url")
+                filename = f"<a href='{url}' target='_blank'>{name}</a>" if url else f"<b>{name}</b>"
+
+                selected_text = self.semantic_highlighter.highlight_text(query, text_node.text)
                 page = f"<br>Page {page}" if page else ""
                 output.append(f"<p><b>{filename}</b><br>{selected_text}{page}</p>")
 

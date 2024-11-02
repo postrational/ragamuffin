@@ -47,7 +47,6 @@ class ZoteroLibrary(Library):
 
         logger.info("Downloading articles...")
 
-        items = items[:10]  # For testing purposes
         for item in track(items, description="Downloading..."):
             # Parse the article data
             article_metadata = self.parse_article_data(item)
