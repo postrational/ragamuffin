@@ -7,9 +7,6 @@ from ragamuffin.settings import get_settings
 from ragamuffin.storage.cassandra import CassandraStorage
 from ragamuffin.webui.gradio_chat import GradioAgentChatUI
 
-# @TODO: Add the ability to set similarity_top_k of the bot retriever
-# llama_index.core.constants.DEFAULT_SIMILARITY_TOP_K = 6
-
 logger = logging.getLogger(__name__)
 
 
@@ -39,7 +36,7 @@ def main(regenerate: bool) -> None:
         index = storage.load_index()
 
     logger.info("Starting the chat interface...")
-    agent = index.as_chat_engine()
+    agent = index.as_chat_engine(similarity_top_k=6)
     webapp = GradioAgentChatUI(agent)
     webapp.run()
 
