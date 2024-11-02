@@ -1,0 +1,21 @@
+#sources {
+    height: 600px;
+    font-size: 12px;
+    overflow: auto;
+    /*overflow-y: scroll !important*/
+}
+
+#sources p {
+    margin-bottom: 15px;
+}
+
+/*.similarity-0 { background-color: rgba(0, 255, 255, 0.1); }*/
+/*.similarity-1 { background-color: rgba(0, 255, 255, 0.15); }*/
+.similarity-2 { background-color: rgba(0, 255, 255, 0.2); }
+.similarity-3 { background-color: rgba(0, 255, 255, 0.25); }
+.similarity-4 { background-color: rgba(0, 255, 255, 0.3); }
+.similarity-5 { background-color: rgba(0, 255, 255, 0.35); }
+.similarity-6 { background-color: rgba(0, 255, 255, 0.4); }
+.similarity-7 { background-color: rgba(0, 255, 255, 0.45); }
+.similarity-8 { background-color: rgba(0, 255, 255, 0.5); }
+.similarity-9 { background-color: rgba(0, 255, 255, 0.55); }

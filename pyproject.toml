@@ -1,0 +1,112 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "zoterochat"
+version = "0.1.0"
+description = ""
+authors = ["Michal Karzynski <github@karzyn.com>"]
+readme = "README.md"
+packages = [
+    { include = "ragamuffin", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyzotero = "^1.5.25"
+rich = "^13.9.3"
+llama-index = "^0.11.20"
+llama-index-vector-stores-cassandra = "^0.2.0"
+gradio = "^5.4.0"
+click = "^8.1.7"
+python-dateutil = "^2.9.0.post0"
+transformers = {extras = ["torch"], version = "^4.46.1"}
+scikit-learn = "^1.5.2"
+sentence-transformers = "^3.2.1"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.7.1"
+
+[tool.ruff]
+line-length = 120
+lint.select = [
+    "F",    # Pyflakes
+    "E",    # Error
+    "W",    # Warning
+    "C90",  # mccabe
+    "I",    # isort
+    "N",    # pep8-naming
+    "D",    # pydocstyle
+    "UP",   # pyupgrade
+    "YTT",  # flake8-2020
+    "ANN",  # flake8-annotations
+    "S",    # flake8-bandit
+    "BLE",  # flake8-blind-except
+    "B",    # flake8-bugbear
+    "A",    # flake8-builtins
+    "COM",  # flake8-commas
+    "C4",   # flake8-comprehensions
+    "DTZ",  # flake8-datetimez
+    "T10",  # flake8-debugger
+    "DJ",   # flake8-django
+    "EM",   # flake8-errmsg
+    "EXE",  # flake8-executable
+    "FA",   # flake8-future-annotations
+    "ISC",  # flake8-implicit-str-concat
+    "ICN",  # flake8-import-conventions
+    "LOG",  # flake8-logging
+    "G",    # flake8-logging-format
+    "INP",  # flake8-no-pep420
+    "PIE",  # flake8-pie
+    "T20",  # flake8-print
+    "PYI",  # flake8-pyi
+    "PT",   # flake8-pytest-style
+    "Q",    # flake8-quotes
+    "RSE",  # flake8-raise
+    "RET",  # flake8-return
+    "SLF",  # flake8-self
+    "SLOT", # flake8-slots
+    "SIM",  # flake8-simplify
+    "TID",  # flake8-tidy-imports
+    "TCH",  # flake8-type-checking
+    "INT",  # flake8-gettext
+    "ARG",  # flake8-unused-arguments
+    "PTH",  # flake8-use-pathlib
+    "TD",   # flake8-todos
+    "FIX",  # flake8-fixme
+    "ERA",  # eradicate
+    "PD",   # pandas-vet
+    "PGH",  # pygrep-hooks
+    "PL",   # Pylint
+    "C",    # Convention
+    "E",    # Error
+    "R",    # Refactor
+    "W",    # Warning
+    "TRY",  # tryceratops
+    "FLY",  # flynt
+    "NPY",  # NumPy-specific rules
+    "AIR",  # Airflow
+    "PERF", # Perflint
+    "FURB", # refurb
+    "RUF",  # Ruff-specific rules
+]
+lint.ignore = [
+    "ANN101",   # Missing type annotation for self in method
+    "ARG002",   # Unused method argument
+    "COM812", 	# Trailing comma missing
+    "D100",     # Missing docstring in public module
+    "D101",     # Missing docstring in public class
+    "D104",     # Missing docstring in public package
+    "D107",     # Missing docstring in `__init__
+    "D417",     # Missing argument descriptions in the docstring
+    "G004",     # Logging statement uses f-string
+    "ISC001",   # Implicitly concatenated string literals on one line
+]
+target-version = "py310"  # or your target Python version
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
