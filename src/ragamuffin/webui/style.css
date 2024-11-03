@@ -1,8 +1,12 @@
+#chatbot {
+    height: calc(100vh - 300px) !important;
+}
+
 #sources {
-    height: 600px;
+    height: calc(100vh - 100px);
     font-size: 12px;
     overflow: auto;
-    /*overflow-y: scroll !important*/
+    overflow-x: hidden;
 }
 
 #sources p {

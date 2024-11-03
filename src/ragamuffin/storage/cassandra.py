@@ -16,7 +16,7 @@ class CassandraStorage:
         self.cluster_ip = cluster_ip
         self.keyspace = keyspace
 
-        if not bool(re.fullmatch(r'\w+', table)):
+        if not bool(re.fullmatch(r"\w+", table)):
             raise ValueError(f"Agent name must contain only alphanumeric characters and underscores, got: {table}")
 
         self.cluster = Cluster([self.cluster_ip])

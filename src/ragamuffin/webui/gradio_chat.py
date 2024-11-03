@@ -57,14 +57,14 @@ class GradioAgentChatUI(BaseLlamaPack):
                 # Left Column
                 with gr.Column(scale=3):
                     gr.Markdown(f"### {self.name} 🐈")
-                    chat_window = gr.Chatbot(label="Conversation")
+                    chat_window = gr.Chatbot(label="Conversation", elem_id="chatbot")
                     message = gr.Textbox(label="Write A Message")
                     with gr.Row():
                         clear = gr.ClearButton()
                         submit = gr.Button("Submit", variant="primary")
 
                 # Right Column
-                with gr.Column(scale=1):
+                with gr.Column(scale=2):
                     console = gr.HTML(elem_id="sources")
 
             def apply_submit_action(component_action: Callable) -> None:
