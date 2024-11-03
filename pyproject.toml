@@ -3,7 +3,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "zoterochat"
+name = "ragamuffin"
 version = "0.1.0"
 description = ""
 authors = ["Michal Karzynski <github@karzyn.com>"]
