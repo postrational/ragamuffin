@@ -7,8 +7,9 @@ logger = logging.getLogger(__name__)
 
 
 class Library(ABC):
+    @abstractmethod
     def __init__(self, **kwargs: dict):
-        raise NotImplementedError
+        pass
 
     @abstractmethod
     def get_reader(self) -> BaseReader:

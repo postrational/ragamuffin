@@ -27,9 +27,8 @@ class ZoteroLibrary(Library):
     def get_reader(self) -> BaseReader:
         """Get a Llama Index reader for the downloaded files."""
         self.download_all_articles()
-        file_metadata = self.get_file_metadata
         input_files = self.get_files()
-        return SimpleDirectoryReader(input_files=input_files, file_metadata=file_metadata)
+        return SimpleDirectoryReader(input_files=input_files, file_metadata=self.get_file_metadata)
 
     def download_all_articles(self) -> None:
         """Download all articles from the Zotero library."""

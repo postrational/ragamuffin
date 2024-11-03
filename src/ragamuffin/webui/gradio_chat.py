@@ -14,11 +14,15 @@ class GradioAgentChatUI(BaseLlamaPack):
     def __init__(
         self,
         agent: BaseChatEngine,
+        *,
+        name: str | None = "",
         **kwargs: dict,
     ) -> None:
         """Init params."""
         self.agent = agent
         self.semantic_highlighter = SemanticHighlighter()
+        name = name.capitalize() if name.islower() else name
+        self.name = f"Ragamuffin {name} Chat"
 
     def get_modules(self) -> dict[str, Any]:
         """Get modules."""
@@ -44,7 +48,7 @@ class GradioAgentChatUI(BaseLlamaPack):
         css_filename = Path(__file__).parent / "style.css"
 
         webui = gr.Blocks(
-            title="Ragamuffin Chat",
+            title=self.name,
             theme=rafamuffin_theme,
             css_paths=[css_filename],
         )
@@ -52,7 +56,7 @@ class GradioAgentChatUI(BaseLlamaPack):
             with gr.Row():
                 # Left Column
                 with gr.Column(scale=3):
-                    gr.Markdown("### Ragamuffin Zotero Chat 🦙")
+                    gr.Markdown(f"### {self.name} 🦙")
                     chat_window = gr.Chatbot(label="Conversation")
                     message = gr.Textbox(label="Write A Message")
                     with gr.Row():
@@ -80,7 +84,7 @@ class GradioAgentChatUI(BaseLlamaPack):
             apply_submit_action(submit.click)
             clear.click(self.reset_chat, None, [message, chat_window, console])
 
-        webui.launch(server_port=8080, share=False)
+        webui.launch()
 
     def handle_user_message(self, user_message: str, history: list[str]) -> tuple[str, list[str]]:
         """Handle the user submitted message. Clear message box, and append to the history."""

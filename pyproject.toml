@@ -12,6 +12,10 @@ packages = [
     { include = "ragamuffin", from = "src" },
 ]
 
+[tool.poetry.scripts]
+muffin = "ragamuffin.cli:cli"
+zotero-chat = "ragamuffin.cli:zotero_chat"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 pyzotero = "^1.5.25"
@@ -24,6 +28,8 @@ python-dateutil = "^2.9.0.post0"
 transformers = {extras = ["torch"], version = "^4.46.1"}
 scikit-learn = "^1.5.2"
 sentence-transformers = "^3.2.1"
+ebooklib = "^0.18"
+html2text = "^2024.2.26"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.7.1"
@@ -103,7 +109,7 @@ lint.ignore = [
     "G004",     # Logging statement uses f-string
     "ISC001",   # Implicitly concatenated string literals on one line
 ]
-target-version = "py310"  # or your target Python version
+target-version = "py310"
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

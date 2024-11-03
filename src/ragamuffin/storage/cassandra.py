@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class CassandraStorage:
-    def __init__(self, cluster_ip: str, keyspace: str):
+    def __init__(self, cluster_ip: str, keyspace: str, table: str):
         self.cluster_ip = cluster_ip
         self.keyspace = keyspace
 
@@ -19,7 +19,7 @@ class CassandraStorage:
         self.session = self.cluster.connect()
         cassio.init(session=self.session, keyspace=keyspace)
 
-        self.vector_store = CassandraVectorStore(table="vector_store", embedding_dimension=1536)
+        self.vector_store = CassandraVectorStore(table=table, embedding_dimension=1536)
 
     def generate_index(self, reader: BaseReader) -> BaseIndex:
         """Load the documents and create a RAG index."""
