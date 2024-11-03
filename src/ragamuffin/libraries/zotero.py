@@ -40,7 +40,7 @@ class ZoteroLibrary(Library):
             api_key=self.api_key,
         )
 
-        logger.info("Retrieving your Zotero library...")
+        logger.info("Retrieving your Zotero library. This may take a few minutes...")
         items = zot.everything(zot.top())
         logger.info(f"Total items: {len(items)}")
 
@@ -84,17 +84,17 @@ class ZoteroLibrary(Library):
     def parse_article_data(zotero_item: dict[str, Any]) -> dict[str, str | None]:
         """Retrieve relevant article data from the Zotero item."""
         key = zotero_item["key"]
+        item_data = zotero_item["data"]
 
-        authors = zotero_item["data"]["creators"]
+        authors = item_data.get("creators", [])
         if len(authors) == 0:
             author_str = "Unknown"
-        elif len(authors) == 1:
-            author_str = authors[0]["lastName"]
         else:
-            author_str = f"{authors[0]['lastName']} et al."
+            first_author_name = authors[0].get("lastName", authors[0].get("name", "Unknown"))
+            author_str = first_author_name if len(authors) == 1 else f"{first_author_name} et al."
 
-        publication_year = extract_year(zotero_item["data"]["date"])
-        title = zotero_item["data"]["title"]
+        publication_year = extract_year(item_data.get("date"))
+        title = item_data.get("title")
 
         # Generate name
         name = f"({author_str}, {publication_year}) {title}" if publication_year else f"({author_str}) {title}"
