@@ -52,6 +52,9 @@ class SemanticHighlighter:
             source_sentence_indices.append((start_idx, end_idx))
             start_idx = end_idx
 
+        if not all_sentences:
+            return []
+
         # Encode query and all sentences together
         all_texts = [query, *all_sentences]
         embeddings = self.model.encode(all_texts)

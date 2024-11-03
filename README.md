@@ -1,4 +1,4 @@
-# Ragamuffin - Zotero Chat
+# Ragamuffin - Zotero Chat 🐈
 
 Ragamuffin is a [RAG][rag]-powered chat agent which can access your [Zotero][zotero] library.
 
@@ -14,11 +14,11 @@ libraries and uses [Gradio][gradio] for the user interface.
 
 ### Pre-requisites
 
-Ragamuffin requires Python 3.10 or higher and a working installation of [Cassandra DB](https://cassandra.apache.org/).
+Ragamuffin requires Python 3.10 or higher and a working installation of [Cassandra DB][cassandra].
 
 Install Cassandra DB and create a keyspace named `ragamuffin`.
 
-On a Mac, you can install Cassandra using [Homebrew](https://brew.sh/):
+On a Mac, you can install Cassandra using [Homebrew][brew]:
 
     $ brew install cassandra
     $ brew services start cassandra
@@ -34,7 +34,7 @@ On a Mac, you can install Cassandra using [Homebrew](https://brew.sh/):
 
 ## Usage
 
-In order to use Ragamuffin, you need to generate a Zotero API key and an OpenAI API key.
+In order to use Ragamuffin, you need to generate a [Zotero API key][zotero-key] and an [OpenAI API key][openai-key].
 Set these as environment variables before running the chat agent. 
 
     $ export ZOTERO_LIBRARY_ID=1234567
@@ -63,9 +63,13 @@ Start the chat agent using the following command:
 
     (venv) $ muffin chat my_agent
 
-[rag]: https://en.wikipedia.org/wiki/Retrieval-augmented_generation
-[zotero]: https://www.zotero.org/
-[llama-index]: https://www.llamaindex.ai/
+[brew]: https://brew.sh/
+[cassandra]: https://cassandra.apache.org/
 [gradio]: https://www.gradio.app/
+[llama-index]: https://www.llamaindex.ai/
+[openai-key]: https://platform.openai.com/api-keys
+[rag]: https://en.wikipedia.org/wiki/Retrieval-augmented_generation
 [sbert]: https://sbert.net/
 [transformers]: https://huggingface.co/transformers/
+[zotero-key]: https://www.zotero.org/settings/security#applications
+[zotero]: https://www.zotero.org/

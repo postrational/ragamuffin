@@ -56,7 +56,7 @@ class GradioAgentChatUI(BaseLlamaPack):
             with gr.Row():
                 # Left Column
                 with gr.Column(scale=3):
-                    gr.Markdown(f"### {self.name} 🦙")
+                    gr.Markdown(f"### {self.name} 🐈")
                     chat_window = gr.Chatbot(label="Conversation")
                     message = gr.Textbox(label="Write A Message")
                     with gr.Row():
@@ -84,7 +84,7 @@ class GradioAgentChatUI(BaseLlamaPack):
             apply_submit_action(submit.click)
             clear.click(self.reset_chat, None, [message, chat_window, console])
 
-        webui.launch()
+        webui.launch(inbrowser=True)
 
     def handle_user_message(self, user_message: str, history: list[str]) -> tuple[str, list[str]]:
         """Handle the user submitted message. Clear message box, and append to the history."""
@@ -111,6 +111,9 @@ class GradioAgentChatUI(BaseLlamaPack):
         output_html = ""
         sources_text = []
         nodes_info = []
+
+        if not sources:
+            return "<p>No sources found.</p>"
 
         # Collect all texts and their associated metadata
         for source in sources:
