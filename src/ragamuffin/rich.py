@@ -28,3 +28,15 @@ def track(items: Iterable[T], total: int | None = None, description: str = "") -
         for item in items:
             yield item
             progress.update(task, advance=1)
+
+
+def format_list(items: list[str], numbered: bool = False) -> str:
+    """Display a list of items."""
+    formatted_string = ""
+    for i, item in enumerate(items, start=1):
+        if numbered:
+            formatted_string += f"{i}. [cyan]{item}[/]\n"
+        else:
+            formatted_string += f"• [cyan]{item}[/]\n"
+
+    return formatted_string

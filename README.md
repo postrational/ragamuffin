@@ -80,7 +80,7 @@ On a Mac, you can install Cassandra using [Homebrew][brew]:
 
 To use Cassandra for storage, set the `RAGAMUFFIN_STORAGE_TYPE` environment variable to `cassandra`:
 
-    $ export RAGAMUFFIN_STORAGE=cassandra
+    $ export RAGAMUFFIN_STORAGE_TYPE=cassandra
 
 
 [brew]: https://brew.sh/

@@ -1,4 +1,5 @@
 import logging
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -10,39 +11,49 @@ from pyzotero.zotero import Zotero
 
 from ragamuffin.libraries.interface import Library
 from ragamuffin.libraries.utils import extract_year
-from ragamuffin.progress_bar import track
-from ragamuffin.settings import get_settings
+from ragamuffin.rich import format_list, track
 
 logger = logging.getLogger(__name__)
 
 
 class ZoteroLibrary(Library):
-    def __init__(self, library_id: str, api_key: str):
+    def __init__(self, library_id: str, api_key: str, collections: list[str] | None = None):
         self.library_id = library_id
         self.api_key = api_key
         self.storage_dir = Path(tempfile.gettempdir()) / "ragamuffin" / "zotero"
         self.storage_dir.mkdir(exist_ok=True, parents=True)
         self.articles = {}
-
-    def get_reader(self) -> BaseReader:
-        """Get a Llama Index reader for the downloaded files."""
-        self.download_all_articles()
-        input_files = self.get_files()
-        return SimpleDirectoryReader(input_files=input_files, file_metadata=self.get_file_metadata)
-
-    def download_all_articles(self) -> None:
-        """Download all articles from the Zotero library."""
-        self.storage_dir.mkdir(exist_ok=True)
-
-        zot = Zotero(
+        self.zot = Zotero(
             library_id=self.library_id,
             library_type="user",
             api_key=self.api_key,
         )
+        self.collections = self.get_selected_collections(collections) if collections else None
+
+    def get_reader(self) -> BaseReader:
+        """Get a Llama Index reader for the downloaded files."""
+        self.download_articles()
+        input_files = self.get_files()
+        if not input_files:
+            logger.error("No articles were downloaded.")
+            sys.exit(2)
+        return SimpleDirectoryReader(input_files=input_files, file_metadata=self.get_file_metadata)
+
+    def download_articles(self) -> None:
+        """Download articles from the Zotero library."""
+        self.storage_dir.mkdir(exist_ok=True)
 
         logger.info("Retrieving your Zotero library. This may take a few minutes...")
-        items = zot.everything(zot.top())
-        logger.info(f"Total items: {len(items)}")
+
+        if self.collections:
+            items = []
+            for collection_key in self.collections:
+                collection_items = self.zot.everything(self.zot.collection_items(collection_key))
+                items.extend(collection_items)
+            logger.info(f"Total items in selected collections: {len(items)}")
+        else:
+            items = self.zot.everything(self.zot.top())
+            logger.info(f"Total items: {len(items)}")
 
         logger.info("Downloading articles...")
 
@@ -68,7 +79,7 @@ class ZoteroLibrary(Library):
 
             # Download the file
             with filename.open("wb") as f:
-                f.write(zot.file(attachment_key))
+                f.write(self.zot.file(attachment_key))
             logger.info(f"Downloaded: {name}")
 
     @staticmethod
@@ -130,14 +141,25 @@ class ZoteroLibrary(Library):
         """Get the list of downloaded files."""
         return list(self.articles.keys())
 
+    def get_selected_collections(self, collections: list[str]) -> dict[str, str]:
+        """Get the Zotero IDs of the selected collections."""
+        if len(collections) > 1:
+            logger.info(f"Selected collections: {collections}")
+        else:
+            logger.info(f"Selected collection: {collections[0]}")
+        available_collections = self.fetch_user_collections()
+        available_collections_names = sorted(available_collections.values())
 
-if __name__ == "__main__":
-    settings = get_settings()
+        if any(collection not in available_collections_names for collection in collections):
+            logger.error("One or more selected collections not found.")
+            logger.info(f"Available collections:\n{format_list(available_collections_names)}", extra={"markup": True})
+            sys.exit(2)
 
-    library = ZoteroLibrary(library_id=settings["zotero_library_id"], api_key=settings["zotero_api_key"])
-    library.download_all_articles()
-    reader = library.get_reader()
-    logger.info("Reading the downloaded files...")
-    data_iter = reader.iter_data()
-    logger.info("Example data:")
-    logger.info(next(data_iter))
+        return {key: name for key, name in available_collections.items() if name in collections}
+
+    def fetch_user_collections(self) -> dict[str, str]:
+        """Fetch all collections from the user's Zotero library."""
+        logger.info("Fetching your Zotero collections... This may take a few minutes.")
+        collections = self.zot.all_collections()
+        logger.info(f"Found {len(collections)} collections.")
+        return {collection["key"]: collection["data"]["name"] for collection in collections}

@@ -1,9 +1,11 @@
 import logging
+import sys
 
 import click
 
 from ragamuffin.libraries.local import LocalLibrary
 from ragamuffin.libraries.zotero import ZoteroLibrary
+from ragamuffin.rich import format_list
 from ragamuffin.settings import get_settings
 from ragamuffin.storage.utils import get_storage
 
@@ -12,17 +14,19 @@ logger = logging.getLogger(__name__)
 
 @click.command()
 @click.option("--generate", is_flag=True, help="Generate the RAG index.")
-def zotero_chat(generate: bool) -> None:
+@click.option("--collection", multiple=True, help="Zotero collection to include.")
+@click.version_option(message="Ragamuffin %(version)s")
+def zotero_chat(generate: bool, collection: list[str]) -> None:
     """Start the chat interface."""
     logger.info("Starting Zotero chat...")
     settings = get_settings()
-
     storage = get_storage()
 
     if generate:
         library = ZoteroLibrary(
             library_id=settings["zotero_library_id"],
             api_key=settings["zotero_api_key"],
+            collections=collection,
         )
         reader = library.get_reader()
 
@@ -41,6 +45,7 @@ def zotero_chat(generate: bool) -> None:
 
 
 @click.group(help="Ragamuffin RAG Chat Agents.")
+@click.version_option(message="Ragamuffin %(version)s")
 def cli() -> None:
     """Muffin CLI."""
 
@@ -75,6 +80,13 @@ def chat(name: str) -> None:
     logger.info(f"Starting the chat interface for agent '{name}'.")
     storage = get_storage()
 
+    # Check if the agent exists
+    active_agents = storage.list_agents()
+    if name not in active_agents:
+        logger.error(f"Agent '{name}' not found.")
+        logger.info(f"Available chat agents:\n\n{format_list(active_agents)}", extra={"markup": True})
+        sys.exit(1)
+
     logger.info("Loading the RAG embedding index...")
     index = storage.load_index(name)
 
@@ -96,7 +108,7 @@ def agents() -> None:
         logger.info("No chat agents available. Use 'muffin generate' to create one.")
         return
 
-    logger.info(f"Available chat agents:\n * {'\n * '.join(active_agents)}")
+    logger.info(f"Available chat agents:\n\n{format_list(active_agents)}", extra={"markup": True})
 
 
 @cli.command

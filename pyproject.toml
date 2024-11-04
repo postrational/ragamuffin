@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ragamuffin"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["Michal Karzynski <github@karzyn.com>"]
 readme = "README.md"
