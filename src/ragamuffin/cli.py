@@ -5,7 +5,7 @@ import click
 from ragamuffin.libraries.local import LocalLibrary
 from ragamuffin.libraries.zotero import ZoteroLibrary
 from ragamuffin.settings import get_settings
-from ragamuffin.storage.cassandra import CassandraStorage
+from ragamuffin.storage.utils import get_storage
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +17,7 @@ def zotero_chat(generate: bool) -> None:
     logger.info("Starting Zotero chat...")
     settings = get_settings()
 
-    logger.info("Connecting to the Cassandra cluster...")
-    storage = CassandraStorage(
-        cluster_ip=settings.get("cassandra_cluster_ip"), keyspace=settings.get("cassandra_keyspace"), table="zoterochat"
-    )
+    storage = get_storage()
 
     if generate:
         library = ZoteroLibrary(
@@ -33,7 +30,7 @@ def zotero_chat(generate: bool) -> None:
         index = storage.generate_index(reader)
     else:
         logger.info("Loading the RAG embedding index...")
-        index = storage.load_index()
+        index = storage.load_index("zoterochat")
 
     logger.info("Starting the chat interface...")
     agent = index.as_chat_engine(similarity_top_k=6)
@@ -48,42 +45,38 @@ def cli() -> None:
     """Muffin CLI."""
 
 
-@cli.command(name="generate", help="Generate the RAG index for a chat agent.")
+@cli.command(name="generate")
 @click.argument("name")
 @click.argument("source_dir", type=click.Path(exists=True, file_okay=False))
 def create_agent(name: str, source_dir: str) -> None:
-    """Create a new chat agent using a directory of documents."""
-    logger.info(f"Creating a new chat agent '{name}' from '{source_dir}'.")
-    settings = get_settings()
+    """Create a new chat agent using a directory of documents.
 
-    logger.info("Connecting to the Cassandra cluster...")
-    storage = CassandraStorage(
-        cluster_ip=settings.get("cassandra_cluster_ip"), keyspace=settings.get("cassandra_keyspace"), table=name
-    )
+    \b
+    Args:
+        name: A name for the chat agent.
+        source_dir: A directory containing the documents it will know.
+    """
+    logger.info(f"Creating a new chat agent '{name}' from '{source_dir}'.")
+    storage = get_storage()
 
     library = LocalLibrary(library_dir=source_dir)
     reader = library.get_reader()
 
     logger.info("Generating RAG embeddings...")
-    storage.generate_index(reader)
+    storage.generate_index(name, reader)
 
     logger.info(f"Agent '{name}' created successfully.")
 
 
-@cli.command(name="chat")
+@cli.command
 @click.argument("name")
 def chat(name: str) -> None:
     """Start a chat agent."""
     logger.info(f"Starting the chat interface for agent '{name}'.")
-    settings = get_settings()
-
-    logger.info("Connecting to the Cassandra cluster...")
-    storage = CassandraStorage(
-        cluster_ip=settings.get("cassandra_cluster_ip"), keyspace=settings.get("cassandra_keyspace"), table=name
-    )
+    storage = get_storage()
 
     logger.info("Loading the RAG embedding index...")
-    index = storage.load_index()
+    index = storage.load_index(name)
 
     logger.info("Starting the chat interface...")
     agent = index.as_chat_engine(similarity_top_k=6)
@@ -91,6 +84,32 @@ def chat(name: str) -> None:
 
     webapp = GradioAgentChatUI(agent, name=name)
     webapp.run()
+
+
+@cli.command
+def agents() -> None:
+    """List the available chat agents."""
+    storage = get_storage()
+    active_agents = storage.list_agents()
+
+    if not active_agents:
+        logger.info("No chat agents available. Use 'muffin generate' to create one.")
+        return
+
+    logger.info(f"Available chat agents:\n * {'\n * '.join(active_agents)}")
+
+
+@cli.command
+@click.argument("name")
+def delete(name: str) -> None:
+    """Delete a chat agent.
+
+    \b
+    Args:
+        name: The name of the chat agent to delete. Use 'muffin agents' to list them.
+    """
+    storage = get_storage()
+    storage.delete_agent(name)
 
 
 if __name__ == "__main__":

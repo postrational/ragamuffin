@@ -17,7 +17,7 @@ class GradioAgentChatUI(BaseLlamaPack):
         *,
         name: str | None = "",
         **kwargs: dict,
-    ) -> None:
+    ):
         """Init params."""
         self.agent = agent
         self.semantic_highlighter = SemanticHighlighter()
@@ -117,7 +117,8 @@ class GradioAgentChatUI(BaseLlamaPack):
 
         # Collect all texts and their associated metadata
         for source in sources:
-            for node_with_score in source.raw_output.source_nodes:
+            source_nodes = source.raw_output.source_nodes if hasattr(source.raw_output, "source_nodes") else []
+            for node_with_score in source_nodes:
                 text_node = node_with_score.node
                 metadata = text_node.metadata
                 page = metadata.get("page_label")

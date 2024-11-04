@@ -14,23 +14,13 @@ libraries and uses [Gradio][gradio] for the user interface.
 
 ### Pre-requisites
 
-Ragamuffin requires Python 3.10 or higher and a working installation of [Cassandra DB][cassandra].
-
-Install Cassandra DB and create a keyspace named `ragamuffin`.
-
-On a Mac, you can install Cassandra using [Homebrew][brew]:
-
-    $ brew install cassandra
-    $ brew services start cassandra
-    $ cqlsh
-    cqlsh> CREATE KEYSPACE ragamuffin WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+Ragamuffin requires Python 3.10 or higher. It's recommended to use a virtual environment to install the package.
 
 ### Install Ragamuffin in a virtual environment
 
     $ python3 -m venv venv
     $ source venv/bin/activate
     (venv) $ pip install git+https://github.com/postrational/ragamuffin.git
-
 
 ## Usage
 
@@ -62,6 +52,36 @@ Use the `muffin` command to generate an agent named `my_agent` based on the docu
 Start the chat agent using the following command:
 
     (venv) $ muffin chat my_agent
+
+### List created agents
+
+You can list all the agents created using the `muffin` command:
+
+    (venv) $ muffin agents
+
+### Delete an agent
+
+You can delete an agent using the `muffin` command:
+
+    (venv) $ muffin delete my_agent
+
+## Use Cassandra for agent storage
+
+You can use [Cassandra DB][cassandra] for more efficient storage of the RAG indexes of your agents.
+
+Install Cassandra DB and create a keyspace named `ragamuffin`.
+
+On a Mac, you can install Cassandra using [Homebrew][brew]:
+
+    $ brew install cassandra
+    $ brew services start cassandra
+    $ cqlsh
+    cqlsh> CREATE KEYSPACE ragamuffin WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+
+To use Cassandra for storage, set the `RAGAMUFFIN_STORAGE_TYPE` environment variable to `cassandra`:
+
+    $ export RAGAMUFFIN_STORAGE=cassandra
+
 
 [brew]: https://brew.sh/
 [cassandra]: https://cassandra.apache.org/

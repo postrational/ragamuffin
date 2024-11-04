@@ -6,12 +6,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 class SemanticHighlighter:
-    def __init__(self) -> None:
+    def __init__(self):
         # Load the embedding model
         model_name = "all-mpnet-base-v2"
         self.model = SentenceTransformer(model_name)
         # Download the NLTK tokenizer
-        nltk.download("punkt", quiet=True)
+        nltk.download("punkt_tab", quiet=True)
 
     def highlight_text(self, query: str, source: str, max_length: int = 500) -> str:
         """Highlight sentences in the source text based on their similarity to the query.

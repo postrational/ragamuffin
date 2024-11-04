@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ragamuffin"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Michal Karzynski <github@karzyn.com>"]
 readme = "README.md"
@@ -56,7 +56,7 @@ lint.select = [
     "DTZ",  # flake8-datetimez
     "T10",  # flake8-debugger
     "DJ",   # flake8-django
-    "EM",   # flake8-errmsg
+    # "EM",   # flake8-errmsg
     "EXE",  # flake8-executable
     "FA",   # flake8-future-annotations
     "ISC",  # flake8-implicit-str-concat
@@ -99,15 +99,18 @@ lint.select = [
 ]
 lint.ignore = [
     "ANN101",   # Missing type annotation for self in method
+    "ANN204",   # Missing return type annotation for special method `__init__`
     "ARG002",   # Unused method argument
     "COM812", 	# Trailing comma missing
     "D100",     # Missing docstring in public module
     "D101",     # Missing docstring in public class
     "D104",     # Missing docstring in public package
     "D107",     # Missing docstring in `__init__
+    "D301",     # Use `r"""` if any backslashes in a docstring
     "D417",     # Missing argument descriptions in the docstring
     "G004",     # Logging statement uses f-string
     "ISC001",   # Implicitly concatenated string literals on one line
+    "TRY003",   # Avoid specifying long messages outside the exception class
 ]
 target-version = "py310"
 
