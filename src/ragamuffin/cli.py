@@ -14,9 +14,10 @@ logger = logging.getLogger(__name__)
 
 @click.command()
 @click.option("--generate", is_flag=True, help="Generate the RAG index.")
-@click.option("--collection", multiple=True, help="Zotero collection to include.")
+@click.option("--collection", multiple=True, help="Zotero collections to include when generating the index.")
+@click.option("--name", help="Name of the Zotero chat agent. Default is 'zoterochat'.", default="zoterochat")
 @click.version_option(message="Ragamuffin %(version)s")
-def zotero_chat(generate: bool, collection: list[str]) -> None:
+def zotero_chat(generate: bool, collection: list[str], name: str) -> None:
     """Start the chat interface."""
     logger.info("Starting Zotero chat...")
     settings = get_settings()
@@ -24,17 +25,22 @@ def zotero_chat(generate: bool, collection: list[str]) -> None:
 
     if generate:
         library = ZoteroLibrary(
-            library_id=settings["zotero_library_id"],
-            api_key=settings["zotero_api_key"],
-            collections=collection,
+            library_id=settings["zotero_library_id"], api_key=settings["zotero_api_key"], collections=collection
         )
         reader = library.get_reader()
 
         logger.info("Generating RAG embeddings...")
-        index = storage.generate_index(reader)
+        index = storage.generate_index(name, reader)
+
     else:
+        active_agents = storage.list_agents()
+        if name not in active_agents:
+            logger.error(f"Agent '{name}' not found.")
+            logger.info("Run 'zotero-chat --generate' to create a new chat agent base on your library.")
+            sys.exit(3)
+
         logger.info("Loading the RAG embedding index...")
-        index = storage.load_index("zoterochat")
+        index = storage.load_index(name)
 
     logger.info("Starting the chat interface...")
     agent = index.as_chat_engine(similarity_top_k=6)

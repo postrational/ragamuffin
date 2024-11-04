@@ -1,5 +1,6 @@
 import logging
 import re
+import sys
 
 import cassio
 from cassandra.cluster import Cluster
@@ -22,13 +23,13 @@ class CassandraStorage(Storage):
         cassio.init(session=self.session, keyspace=keyspace)
 
     def _validate_agent_name(self, agent_name: str) -> None:
-        if not bool(re.match(r"^[a-zA-Z_][a-zA-Z0-9_]{0,47}$", agent_name)):
+        if not bool(re.match(r"^[a-z_][a-z0-9_]{0,47}$", agent_name)):
             logger.error(f"Invalid agent name: {agent_name}")
             logger.info(
-                "Agent names must start with a letter or underscore, contain "
-                "alphanumeric characters and underscores, and be 1-48 characters long."
+                "Agent names must start with a letter or underscore, contain alphanumeric "
+                "lowercase characters and underscores, and be 1-48 characters long."
             )
-            raise ValueError
+            sys.exit(4)
 
     def generate_index(self, agent_name: str, reader: BaseReader) -> BaseIndex:
         """Load the documents and create a RAG index."""

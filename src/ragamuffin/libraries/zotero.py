@@ -48,7 +48,7 @@ class ZoteroLibrary(Library):
         if self.collections:
             items = []
             for collection_key in self.collections:
-                collection_items = self.zot.everything(self.zot.collection_items(collection_key))
+                collection_items = self.zot.everything(self.zot.collection_items_top(collection_key))
                 items.extend(collection_items)
             logger.info(f"Total items in selected collections: {len(items)}")
         else:
