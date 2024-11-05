@@ -5,6 +5,7 @@ import click
 
 from ragamuffin.libraries.local import LocalLibrary
 from ragamuffin.libraries.zotero import ZoteroLibrary
+from ragamuffin.models.select import get_llm_by_name
 from ragamuffin.rich import format_list
 from ragamuffin.settings import get_settings
 from ragamuffin.storage.utils import get_storage
@@ -43,7 +44,8 @@ def zotero_chat(generate: bool, collection: list[str], name: str) -> None:
         index = storage.load_index(name)
 
     logger.info("Starting the chat interface...")
-    agent = index.as_chat_engine(similarity_top_k=6)
+    llm = get_llm_by_name(settings.get("llm_model"))
+    agent = index.as_chat_engine(llm=llm, similarity_top_k=6)
     from ragamuffin.webui.gradio_chat import GradioAgentChatUI
 
     webapp = GradioAgentChatUI(agent, name="Zotero")
@@ -85,6 +87,7 @@ def chat(name: str) -> None:
     """Start a chat agent."""
     logger.info(f"Starting the chat interface for agent '{name}'.")
     storage = get_storage()
+    settings = get_settings()
 
     # Check if the agent exists
     active_agents = storage.list_agents()
@@ -97,7 +100,9 @@ def chat(name: str) -> None:
     index = storage.load_index(name)
 
     logger.info("Starting the chat interface...")
-    agent = index.as_chat_engine(similarity_top_k=6)
+
+    llm = get_llm_by_name(settings.get("llm_model"))
+    agent = index.as_chat_engine(llm=llm, similarity_top_k=6)
     from ragamuffin.webui.gradio_chat import GradioAgentChatUI
 
     webapp = GradioAgentChatUI(agent, name=name)

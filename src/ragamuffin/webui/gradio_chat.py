@@ -7,7 +7,7 @@ from gradio.themes.utils import colors, fonts
 from llama_index.core.chat_engine.types import BaseChatEngine
 from llama_index.core.llama_pack import BaseLlamaPack
 
-from ragamuffin.nlp.highlighter import SemanticHighlighter
+from ragamuffin.models.highlighter import SemanticHighlighter
 
 
 class GradioAgentChatUI(BaseLlamaPack):
