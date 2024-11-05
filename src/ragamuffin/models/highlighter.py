@@ -1,7 +1,7 @@
 import nltk
 import numpy as np
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from nltk.tokenize import sent_tokenize
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
@@ -9,25 +9,9 @@ class SemanticHighlighter:
     def __init__(self):
         # Load the embedding model
         model_name = "all-mpnet-base-v2"
-        self.model = SentenceTransformer(model_name)
+        self.model = HuggingFaceEmbedding(model_name=model_name, embed_batch_size=32)
         # Download the NLTK tokenizer
         nltk.download("punkt_tab", quiet=True)
-
-    def highlight_text(self, query: str, source: str, max_length: int = 500) -> str:
-        """Highlight sentences in the source text based on their similarity to the query.
-
-        Args:
-            query: The search query string.
-            source: The source text to highlight.
-            max_length: Maximum length of the returned highlighted text.
-
-        Returns:
-            HTML string with highlighted sentences based on similarity.
-        """
-        sentences = self._split_sentences(source)
-        similarities = self._compute_similarities(query, sentences)
-        selected_indices = self._select_trimmed_sentences(sentences, similarities, max_length)
-        return self._apply_markup(sentences, similarities, selected_indices)
 
     def highlight_multiple(self, query: str, sources: list[str], max_length: int = 500) -> list[str]:
         """Highlight sentences in multiple source texts based on their similarity to the query.
@@ -57,7 +41,7 @@ class SemanticHighlighter:
 
         # Encode query and all sentences together
         all_texts = [query, *all_sentences]
-        embeddings = self.model.encode(all_texts)
+        embeddings = self._generate_text_embeddings(all_texts)
         query_embedding = embeddings[0]
         sentence_embeddings = embeddings[1:]
         similarities = cosine_similarity([query_embedding], sentence_embeddings).flatten()
@@ -73,6 +57,10 @@ class SemanticHighlighter:
 
         return results
 
+    def _generate_text_embeddings(self, texts: list[str]) -> list[list[float]]:
+        """Generate embeddings for the input texts."""
+        return self.model.get_text_embedding_batch(texts)
+
     def _split_sentences(self, text: str) -> list[str]:
         """Tokenize the input text into sentences.
 
@@ -83,23 +71,6 @@ class SemanticHighlighter:
             A list of sentences.
         """
         return sent_tokenize(text)
-
-    def _compute_similarities(self, query: str, sentences: list[str]) -> np.ndarray:
-        """Compute cosine similarity between the query and each sentence in the list.
-
-        Args:
-            query: Query string to compare against each sentence.
-            sentences: List of sentences to compute similarity with.
-
-        Returns:
-            Numpy array of similarity scores.
-        """
-        # Encode query and sentences together to call self.model.encode only once
-        all_texts = [query, *sentences]
-        embeddings = self.model.encode(all_texts)
-        query_embedding = embeddings[0]
-        sentence_embeddings = embeddings[1:]
-        return cosine_similarity([query_embedding], sentence_embeddings).flatten()
 
     def _select_trimmed_sentences(self, sentences: list[str], similarities: np.ndarray, max_length: int) -> list[int]:
         """Select indices of sentences around the highest similarity sentence while respecting max_length.

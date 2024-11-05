@@ -1055,6 +1055,7 @@ files = [
 ]
 
 [package.dependencies]
+aiohttp = {version = "*", optional = true, markers = "extra == \"inference\""}
 filelock = "*"
 fsspec = ">=2023.5.0"
 packaging = ">=20.9"
@@ -1276,13 +1277,13 @@ llama-index-llms-openai = ">=0.2.0,<0.3.0"
 
 [[package]]
 name = "llama-index-core"
-version = "0.11.21"
+version = "0.11.22"
 description = "Interface between LLMs and your data"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "llama_index_core-0.11.21-py3-none-any.whl", hash = "sha256:08d0a605d022127f2eee45d2000b19d1b95fc6f1f3387c8424d924dfa795882d"},
-    {file = "llama_index_core-0.11.21.tar.gz", hash = "sha256:720b6e57e5350a72a22657caa69a8a871fa3da3b37edc2adf4a0bde8e5790ad3"},
+    {file = "llama_index_core-0.11.22-py3-none-any.whl", hash = "sha256:5c59d95dec9bb0727f25b03de89392c69076b2e4aaa6acbd8773de1f07502e9e"},
+    {file = "llama_index_core-0.11.22.tar.gz", hash = "sha256:ddc30b9c873495de40ad8278d0c894ba09f32f6aa7fc638012b1b22b74c32553"},
 ]
 
 [package.dependencies]
@@ -1307,6 +1308,22 @@ tqdm = ">=4.66.1,<5.0.0"
 typing-extensions = ">=4.5.0"
 typing-inspect = ">=0.8.0"
 wrapt = "*"
+
+[[package]]
+name = "llama-index-embeddings-huggingface"
+version = "0.3.1"
+description = "llama-index embeddings huggingface integration"
+optional = false
+python-versions = "<4.0,>=3.8.1"
+files = [
+    {file = "llama_index_embeddings_huggingface-0.3.1-py3-none-any.whl", hash = "sha256:71708240b1aec183c80f20d531b39a75d0cce774586e11bb0798f3ecb270749c"},
+    {file = "llama_index_embeddings_huggingface-0.3.1.tar.gz", hash = "sha256:7aef6324a19576e6b95bfe927c3bd4fc1c5725edce9f26b4e5d2eefa27c02fdb"},
+]
+
+[package.dependencies]
+huggingface-hub = {version = ">=0.19.0", extras = ["inference"]}
+llama-index-core = ">=0.11.0,<0.12.0"
+sentence-transformers = ">=2.6.1"
 
 [[package]]
 name = "llama-index-embeddings-openai"
@@ -3866,13 +3883,13 @@ telegram = ["requests"]
 
 [[package]]
 name = "transformers"
-version = "4.46.1"
+version = "4.46.2"
 description = "State-of-the-art Machine Learning for JAX, PyTorch and TensorFlow"
 optional = false
 python-versions = ">=3.8.0"
 files = [
-    {file = "transformers-4.46.1-py3-none-any.whl", hash = "sha256:f77b251a648fd32e3d14b5e7e27c913b7c29154940f519e4c8c3aa6061df0f05"},
-    {file = "transformers-4.46.1.tar.gz", hash = "sha256:16d79927d772edaf218820a96f9254e2211f9cd7fb3c308562d2d636c964a68c"},
+    {file = "transformers-4.46.2-py3-none-any.whl", hash = "sha256:c921f4406b78e6518c97b618c5acd1cf8a4f2315b6b727f4bf9e01496eef849c"},
+    {file = "transformers-4.46.2.tar.gz", hash = "sha256:3d85410881e1c074be767877bf33c83231ec11529f274a6044ecb20c157ba14e"},
 ]
 
 [package.dependencies]
@@ -4306,4 +4323,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "12aa1db021ec5aad7d9dcee0ac8e3d6394cdc663cf8f30f3ec94f1c343c54115"
+content-hash = "17e3f4961363bde4de6651e36b68561af5c5ac2ea957da777dc7457ed533f39b"

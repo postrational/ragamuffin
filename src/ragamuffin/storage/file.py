@@ -2,10 +2,11 @@ import logging
 import shutil
 from pathlib import Path
 
-from llama_index.core import Settings, StorageContext, VectorStoreIndex, load_index_from_storage
+from llama_index.core import StorageContext, VectorStoreIndex, load_index_from_storage
 from llama_index.core.indices.base import BaseIndex
 from llama_index.core.readers.base import BaseReader
 
+from ragamuffin.models.select import configure_llamaindex_embedding_model
 from ragamuffin.settings import get_settings
 from ragamuffin.storage.interface import Storage
 
@@ -14,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 class FileStorage(Storage):
     def __init__(self):
-        self.embedding_dimension = 1536
+        settings = get_settings()
+        self.embedding_dimension = settings.get("embedding_dimension")
 
         settings = get_settings()
         self.persist_dir = Path(settings.get("data_dir")) / "storage"
@@ -30,8 +32,7 @@ class FileStorage(Storage):
         documents = reader.load_data()
 
         # Configure chunking settings
-        Settings.chunk_size = 512
-        Settings.chunk_overlap = 50
+        configure_llamaindex_embedding_model()
 
         # Build the index from documents and persist to disk
         index = VectorStoreIndex.from_documents(documents)

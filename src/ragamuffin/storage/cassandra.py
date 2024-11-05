@@ -4,11 +4,13 @@ import sys
 
 import cassio
 from cassandra.cluster import Cluster
-from llama_index.core import Settings, StorageContext, VectorStoreIndex
+from llama_index.core import StorageContext, VectorStoreIndex
 from llama_index.core.indices.base import BaseIndex
 from llama_index.core.readers.base import BaseReader
 from llama_index.vector_stores.cassandra import CassandraVectorStore
 
+from ragamuffin.models.select import configure_llamaindex_embedding_model
+from ragamuffin.settings import get_settings
 from ragamuffin.storage.interface import Storage
 
 logger = logging.getLogger(__name__)
@@ -36,17 +38,18 @@ class CassandraStorage(Storage):
         self._validate_agent_name(agent_name)
         documents = reader.load_data()
 
-        vector_store = CassandraVectorStore(table=agent_name, embedding_dimension=1536)
+        settings = get_settings()
+        vector_store = CassandraVectorStore(table=agent_name, embedding_dimension=settings.get("embedding_dimension"))
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
-        Settings.chunk_size = 512
-        Settings.chunk_overlap = 50
+        configure_llamaindex_embedding_model()
         index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
         index.storage_context.persist()
         return index
 
     def load_index(self, agent_name: str) -> BaseIndex:
         """Load the index from storage."""
-        vector_store = CassandraVectorStore(table=agent_name, embedding_dimension=1536)
+        settings = get_settings()
+        vector_store = CassandraVectorStore(table=agent_name, embedding_dimension=settings.get("embedding_dimension"))
         return VectorStoreIndex.from_vector_store(vector_store)
 
     def list_agents(self) -> list[str]:

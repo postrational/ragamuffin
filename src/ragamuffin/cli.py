@@ -5,7 +5,7 @@ import click
 
 from ragamuffin.libraries.local import LocalLibrary
 from ragamuffin.libraries.zotero import ZoteroLibrary
-from ragamuffin.models.select import get_llm_by_name
+from ragamuffin.models.select import configure_llamaindex_embedding_model, get_llm_by_name
 from ragamuffin.rich import format_list
 from ragamuffin.settings import get_settings
 from ragamuffin.storage.utils import get_storage
@@ -41,6 +41,7 @@ def zotero_chat(generate: bool, collection: list[str], name: str) -> None:
             sys.exit(3)
 
         logger.info("Loading the RAG embedding index...")
+        configure_llamaindex_embedding_model()
         index = storage.load_index(name)
 
     logger.info("Starting the chat interface...")
@@ -97,6 +98,7 @@ def chat(name: str) -> None:
         sys.exit(1)
 
     logger.info("Loading the RAG embedding index...")
+    configure_llamaindex_embedding_model()
     index = storage.load_index(name)
 
     logger.info("Starting the chat interface...")
