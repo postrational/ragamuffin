@@ -4,7 +4,7 @@ import sys
 import click
 
 from ragamuffin.cli.utils import format_list
-from ragamuffin.libraries.local import LocalLibrary
+from ragamuffin.libraries.files import LocalLibrary
 from ragamuffin.libraries.zotero import ZoteroLibrary
 from ragamuffin.models.select import configure_llamaindex_embedding_model, get_llm_by_name
 from ragamuffin.settings import get_settings
@@ -26,7 +26,7 @@ def generate() -> None:
 
 @generate.command(name="from_files")
 @click.argument("name")
-@click.argument("source_dir", type=click.Path(exists=True, file_okay=False))
+@click.argument("source_dir", type=click.Path(exists=True, file_okay=True))
 def create_agent_from_files(name: str, source_dir: str) -> None:
     """Create a new chat agent using a directory of documents.
 
