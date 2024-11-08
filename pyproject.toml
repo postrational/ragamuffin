@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ragamuffin"
-version = "0.2.0"
+version = "0.2.1"
 description = ""
 authors = ["Michal Karzynski <github@karzyn.com>"]
 readme = "README.md"
@@ -13,8 +13,8 @@ packages = [
 ]
 
 [tool.poetry.scripts]
-muffin = "ragamuffin.cli:cli"
-zotero-chat = "ragamuffin.cli:zotero_chat"
+muffin = "ragamuffin.cli.muffin:cli"
+zotero-chat = "ragamuffin.cli.muffin:zotero_chat"
 
 [tool.poetry.dependencies]
 python = "^3.10"

@@ -11,7 +11,7 @@ from pyzotero.zotero import Zotero
 
 from ragamuffin.libraries.interface import Library
 from ragamuffin.libraries.utils import extract_year
-from ragamuffin.rich import format_list, track
+from ragamuffin.cli.utils import format_list, track
 
 logger = logging.getLogger(__name__)
 

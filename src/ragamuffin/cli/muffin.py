@@ -3,10 +3,10 @@ import sys
 
 import click
 
+from ragamuffin.cli.utils import format_list
 from ragamuffin.libraries.local import LocalLibrary
 from ragamuffin.libraries.zotero import ZoteroLibrary
 from ragamuffin.models.select import configure_llamaindex_embedding_model, get_llm_by_name
-from ragamuffin.rich import format_list
 from ragamuffin.settings import get_settings
 from ragamuffin.storage.utils import get_storage
 
