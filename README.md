@@ -33,13 +33,13 @@ Set these as environment variables before running the chat agent.
 
 ### Generate a RAG index based on your Zotero library
 
-    (venv) $ zotero-chat --generate
+    (venv) $ muffin generate from_zotero zotero_agent
 
 This will generate a RAG index based on the papers in your Zotero library.
 
-Later, you can chat with Ragamuffin using the `zotero-chat` command:
+Later, you can chat with Ragamuffin using the `muffin chat` command:
 
-    (venv) $ zotero-chat
+    (venv) $ muffin chat zotero_agent
 
 ### Create a Chat Agent based on a directory of documents
 
@@ -47,7 +47,7 @@ You can also generate a RAG index based on a directory of files (e.g. PDFs, EPUB
 
 Use the `muffin` command to generate an agent named `my_agent` based on the documents in `/path/to/my/documents/`:
 
-    (venv) $ muffin generate my_agent /path/to/my/documents/
+    (venv) $ muffin generate from_files my_agent /path/to/my/documents/
 
 Start the chat agent using the following command:
 

@@ -1,3 +1,4 @@
+import html
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -46,9 +47,10 @@ class GradioAgentChatUI(BaseLlamaPack):
             ),
         )
         css_filename = Path(__file__).parent / "style.css"
+        title = snake_to_title_case(self.name)
 
         webui = gr.Blocks(
-            title=self.name,
+            title=title,
             theme=rafamuffin_theme,
             css_paths=[css_filename],
         )
@@ -56,7 +58,7 @@ class GradioAgentChatUI(BaseLlamaPack):
             with gr.Row():
                 # Left Column
                 with gr.Column(scale=3):
-                    gr.Markdown(f"### {self.name} 🐈")
+                    gr.Markdown(f"### {title} 🐈")
                     chat_window = gr.Chatbot(label="Conversation", elem_id="chatbot")
                     message = gr.Textbox(label="Write A Message")
                     with gr.Row():
@@ -121,6 +123,7 @@ class GradioAgentChatUI(BaseLlamaPack):
             for node_with_score in source_nodes:
                 text_node = node_with_score.node
                 metadata = text_node.metadata
+                score = node_with_score.score
                 page = metadata.get("page_label")
 
                 filename = metadata.get("file_name", "Unknown Filename")
@@ -134,15 +137,23 @@ class GradioAgentChatUI(BaseLlamaPack):
                     {
                         "filename_html": filename_html,
                         "page": page,
+                        "score": score,
                     }
                 )
 
         # Highlight the texts
+        sources_text = [html.escape(text) for text in sources_text]
         highlighted_texts = self.semantic_highlighter.highlight_multiple(query, sources_text)
 
         # Construct the output using the highlighted texts and metadata
         for highlighted_text, info in zip(highlighted_texts, nodes_info, strict=False):
-            page_html = f"<br>Page {info['page']}" if info["page"] else ""
-            output_html += f"<p><b>{info['filename_html']}</b><br>{highlighted_text}{page_html}</p>"
+            source_footer = f"<br>Page {info['page']}" if info["page"] else "<br>"
+            source_footer += f" ({info['score']:.2f})"
+            output_html += f"<p><b>{info['filename_html']}</b><br>{highlighted_text}{source_footer}</p>"
 
         return output_html
+
+
+def snake_to_title_case(snake_str: str) -> str:
+    """Convert snake case to title case."""
+    return snake_str.replace("_", " ").title()

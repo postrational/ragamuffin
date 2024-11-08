@@ -37,7 +37,7 @@ def configure_llamaindex_embedding_model() -> None:
     """Configure the LlamaIndex embeddings for RAG."""
     settings = get_settings()
     # Configure chunking settings
-    Settings.chunk_size = 512
-    Settings.chunk_overlap = 50
+    Settings.chunk_size = 256
+    Settings.chunk_overlap = 48
     # Set the embedding model
     Settings.embed_model = get_embedding_model_by_name(settings.get("embedding_model"))

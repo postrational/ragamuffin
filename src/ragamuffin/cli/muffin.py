@@ -13,56 +13,21 @@ from ragamuffin.storage.utils import get_storage
 logger = logging.getLogger(__name__)
 
 
-@click.command()
-@click.option("--generate", is_flag=True, help="Generate the RAG index.")
-@click.option("--collection", multiple=True, help="Zotero collections to include when generating the index.")
-@click.option("--name", help="Name of the Zotero chat agent. Default is 'zoterochat'.", default="zoterochat")
-@click.version_option(message="Ragamuffin %(version)s")
-def zotero_chat(generate: bool, collection: list[str], name: str) -> None:
-    """Start the chat interface."""
-    logger.info("Starting Zotero chat...")
-    settings = get_settings()
-    storage = get_storage()
-
-    if generate:
-        library = ZoteroLibrary(
-            library_id=settings["zotero_library_id"], api_key=settings["zotero_api_key"], collections=collection
-        )
-        reader = library.get_reader()
-
-        logger.info("Generating RAG embeddings...")
-        index = storage.generate_index(name, reader)
-
-    else:
-        active_agents = storage.list_agents()
-        if name not in active_agents:
-            logger.error(f"Agent '{name}' not found.")
-            logger.info("Run 'zotero-chat --generate' to create a new chat agent base on your library.")
-            sys.exit(3)
-
-        logger.info("Loading the RAG embedding index...")
-        configure_llamaindex_embedding_model()
-        index = storage.load_index(name)
-
-    logger.info("Starting the chat interface...")
-    llm = get_llm_by_name(settings.get("llm_model"))
-    agent = index.as_chat_engine(llm=llm, similarity_top_k=6)
-    from ragamuffin.webui.gradio_chat import GradioAgentChatUI
-
-    webapp = GradioAgentChatUI(agent, name="Zotero")
-    webapp.run()
-
-
 @click.group(help="Ragamuffin RAG Chat Agents.")
 @click.version_option(message="Ragamuffin %(version)s")
 def cli() -> None:
     """Muffin CLI."""
 
 
-@cli.command(name="generate")
+@cli.group()
+def generate() -> None:
+    """Create chat agents."""
+
+
+@generate.command(name="from_files")
 @click.argument("name")
 @click.argument("source_dir", type=click.Path(exists=True, file_okay=False))
-def create_agent(name: str, source_dir: str) -> None:
+def create_agent_from_files(name: str, source_dir: str) -> None:
     """Create a new chat agent using a directory of documents.
 
     \b
@@ -80,6 +45,27 @@ def create_agent(name: str, source_dir: str) -> None:
     storage.generate_index(name, reader)
 
     logger.info(f"Agent '{name}' created successfully.")
+
+
+@generate.command(name="from_zotero")
+@click.argument("name")
+@click.option("--collection", multiple=True, help="Zotero collections to include when generating the index.")
+def create_agent_from_zotero(collection: list[str], name: str) -> None:
+    """Create an agent from your Zotero library."""
+    logger.info("Creating Zotero chat...")
+    settings = get_settings()
+    storage = get_storage()
+
+    library = ZoteroLibrary(
+        library_id=settings["zotero_library_id"], api_key=settings["zotero_api_key"], collections=collection
+    )
+    reader = library.get_reader()
+
+    logger.info("Generating RAG embeddings...")
+    storage.generate_index(name, reader)
+
+    logger.info(f"Agent '{name}' created successfully.")
+    logger.info(f"Use this command to chat: muffin chat {name}")
 
 
 @cli.command

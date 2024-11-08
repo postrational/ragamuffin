@@ -9,9 +9,9 @@ from llama_index.core.readers.base import BaseReader
 from llama_index.core.readers.file.base import default_file_metadata_func
 from pyzotero.zotero import Zotero
 
+from ragamuffin.cli.utils import format_list, track
 from ragamuffin.libraries.interface import Library
 from ragamuffin.libraries.utils import extract_year
-from ragamuffin.cli.utils import format_list, track
 
 logger = logging.getLogger(__name__)
 
