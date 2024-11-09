@@ -15,8 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class GitLibrary(Library):
-    def __init__(self, git_repo: str, ref: str | None = None, **kwargs: dict):
-        super().__init__(**kwargs)
+    def __init__(self, git_repo: str, ref: str | None = None):
         self.git_repo = git_repo
         self.ref = ref
 

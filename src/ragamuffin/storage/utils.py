@@ -1,5 +1,6 @@
 import logging
 
+from ragamuffin.error_handling import ConfigurationError, ensure_string
 from ragamuffin.settings import get_settings
 from ragamuffin.storage.cassandra import CassandraStorage
 from ragamuffin.storage.file import FileStorage
@@ -18,9 +19,8 @@ def get_storage() -> Storage:
 
     if storage_type == "cassandra":
         logger.info("Connecting to the Cassandra cluster...")
+        ip = ensure_string(settings.get("cassandra_cluster_ip"))
+        keyspace = ensure_string(settings.get("cassandra_keyspace"))
+        return CassandraStorage(cluster_ip=ip, keyspace=keyspace)
 
-        return CassandraStorage(
-            cluster_ip=settings.get("cassandra_cluster_ip"), keyspace=settings.get("cassandra_keyspace")
-        )
-
-    raise ValueError(f"Unknown storage type '{storage_type}'.")
+    raise ConfigurationError(f"Unknown storage type '{storage_type}'.")

@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import Generator, Sequence
 from typing import TypeVar
 
 from rich.progress import (
@@ -14,7 +14,7 @@ from rich.progress import (
 T = TypeVar("T")
 
 
-def track(items: Iterable[T], total: int | None = None, description: str = "") -> Iterable[T]:
+def track(items: Sequence[T], total: int | None = None, description: str = "") -> Generator[T, None, None]:
     """Track the progress of an iterable with a progress bar."""
     with Progress(
         SpinnerColumn(),

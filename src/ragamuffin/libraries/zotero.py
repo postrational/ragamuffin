@@ -22,7 +22,7 @@ class ZoteroLibrary(Library):
         self.api_key = api_key
         self.storage_dir = Path(tempfile.gettempdir()) / "ragamuffin" / "zotero"
         self.storage_dir.mkdir(exist_ok=True, parents=True)
-        self.articles = {}
+        self.articles: dict[str, dict] = {}
         self.zot = Zotero(
             library_id=self.library_id,
             library_type="user",

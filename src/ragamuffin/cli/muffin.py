@@ -4,6 +4,7 @@ import sys
 import click
 
 from ragamuffin.cli.utils import format_list
+from ragamuffin.error_handling import ensure_string, exit_on_error
 from ragamuffin.libraries.files import LocalLibrary
 from ragamuffin.libraries.git_repo import GitLibrary
 from ragamuffin.libraries.zotero import ZoteroLibrary
@@ -28,6 +29,7 @@ def generate() -> None:
 @generate.command(name="from_files")
 @click.argument("name")
 @click.argument("source_dir", type=click.Path(exists=True, file_okay=True))
+@exit_on_error
 def create_agent_from_files(name: str, source_dir: str) -> None:
     """Create a new chat agent using a directory of documents.
 
@@ -51,15 +53,16 @@ def create_agent_from_files(name: str, source_dir: str) -> None:
 @generate.command(name="from_zotero")
 @click.argument("name")
 @click.option("--collection", multiple=True, help="Zotero collections to include when generating the index.")
+@exit_on_error
 def create_agent_from_zotero(collection: list[str], name: str) -> None:
     """Create an agent from your Zotero library."""
     logger.info("Creating Zotero chat...")
     settings = get_settings()
     storage = get_storage()
 
-    library = ZoteroLibrary(
-        library_id=settings["zotero_library_id"], api_key=settings["zotero_api_key"], collections=collection
-    )
+    lib_id = ensure_string(settings.get("zotero_library_id"))
+    api_key = ensure_string(settings.get("zotero_api_key"))
+    library = ZoteroLibrary(library_id=lib_id, api_key=api_key, collections=collection)
     reader = library.get_reader()
 
     logger.info("Generating RAG embeddings...")
@@ -73,6 +76,7 @@ def create_agent_from_zotero(collection: list[str], name: str) -> None:
 @click.argument("name")
 @click.argument("repo_url")
 @click.option("--ref", help="The branch, tag, or commit hash to checkout.")
+@exit_on_error
 def create_agent_from_git(name: str, repo_url: str, ref: str | None) -> None:
     """Create an agent from a Git repository."""
     logger.info("Creating a chat agent from a Git repository...")
@@ -91,6 +95,7 @@ def create_agent_from_git(name: str, repo_url: str, ref: str | None) -> None:
 
 @cli.command
 @click.argument("name")
+@exit_on_error
 def chat(name: str) -> None:
     """Start a chat agent."""
     logger.info(f"Starting the chat interface for agent '{name}'.")
@@ -109,9 +114,10 @@ def chat(name: str) -> None:
     index = storage.load_index(name)
 
     logger.info("Starting the chat interface...")
-
-    llm = get_llm_by_name(settings.get("llm_model"))
+    llm_model = ensure_string(settings.get("llm_model"))
+    llm = get_llm_by_name(llm_model)
     agent = index.as_chat_engine(llm=llm, similarity_top_k=6)
+
     from ragamuffin.webui.gradio_chat import GradioAgentChatUI
 
     webapp = GradioAgentChatUI(agent, name=name)
@@ -119,6 +125,7 @@ def chat(name: str) -> None:
 
 
 @cli.command
+@exit_on_error
 def agents() -> None:
     """List the available chat agents."""
     storage = get_storage()
@@ -133,6 +140,7 @@ def agents() -> None:
 
 @cli.command
 @click.argument("name")
+@exit_on_error
 def delete(name: str) -> None:
     """Delete a chat agent.
 

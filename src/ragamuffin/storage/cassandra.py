@@ -9,6 +9,7 @@ from llama_index.core.indices.base import BaseIndex
 from llama_index.core.readers.base import BaseReader
 from llama_index.vector_stores.cassandra import CassandraVectorStore
 
+from ragamuffin.error_handling import ensure_int
 from ragamuffin.models.select import configure_llamaindex_embedding_model
 from ragamuffin.settings import get_settings
 from ragamuffin.storage.interface import Storage
@@ -39,7 +40,8 @@ class CassandraStorage(Storage):
         documents = reader.load_data()
 
         settings = get_settings()
-        vector_store = CassandraVectorStore(table=agent_name, embedding_dimension=settings.get("embedding_dimension"))
+        embed_dim = ensure_int(settings.get("embedding_dimension"))
+        vector_store = CassandraVectorStore(table=agent_name, embedding_dimension=embed_dim)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         configure_llamaindex_embedding_model()
         index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
@@ -49,7 +51,8 @@ class CassandraStorage(Storage):
     def load_index(self, agent_name: str) -> BaseIndex:
         """Load the index from storage."""
         settings = get_settings()
-        vector_store = CassandraVectorStore(table=agent_name, embedding_dimension=settings.get("embedding_dimension"))
+        embed_dim = ensure_int(settings.get("embedding_dimension"))
+        vector_store = CassandraVectorStore(table=agent_name, embedding_dimension=embed_dim)
         return VectorStoreIndex.from_vector_store(vector_store)
 
     def list_agents(self) -> list[str]:

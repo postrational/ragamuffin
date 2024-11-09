@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ragamuffin"
-version = "0.3.2"
+version = "0.3.3"
 description = ""
 authors = ["Michal Karzynski <github@karzyn.com>"]
 readme = "README.md"
@@ -36,6 +36,10 @@ gitpython = "^3.1.43"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.7.1"
+mypy = "^1.13.0"
+
+[tool.mypy]
+ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 120
@@ -103,6 +107,7 @@ lint.select = [
 lint.ignore = [
     "ANN101",   # Missing type annotation for self in method
     "ANN204",   # Missing return type annotation for special method `__init__`
+    "ANN401",   # typing.Any is disallowed
     "ARG002",   # Unused method argument
     "COM812", 	# Trailing comma missing
     "D100",     # Missing docstring in public module
@@ -114,6 +119,7 @@ lint.ignore = [
     "G004",     # Logging statement uses f-string
     "ISC001",   # Implicitly concatenated string literals on one line
     "TRY003",   # Avoid specifying long messages outside the exception class
+    "TRY400",   # Use `logging.exception` instead of `logging.error`
 ]
 target-version = "py310"
 

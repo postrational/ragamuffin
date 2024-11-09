@@ -8,10 +8,6 @@ logger = logging.getLogger(__name__)
 
 class Library(ABC):
     @abstractmethod
-    def __init__(self, **kwargs: dict):
-        pass
-
-    @abstractmethod
     def get_reader(self) -> BaseReader:
         """Get a Llama Index reader for the library files."""
         raise NotImplementedError

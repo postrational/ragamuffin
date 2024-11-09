@@ -11,8 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class LocalLibrary(Library):
-    def __init__(self, library_dir: str, **kwargs: dict):
-        super().__init__(**kwargs)
+    def __init__(self, library_dir: str):
         self.library_source = library_dir
 
     @override

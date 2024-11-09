@@ -1,5 +1,5 @@
 import html
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
@@ -16,14 +16,13 @@ class GradioAgentChatUI(BaseLlamaPack):
         self,
         agent: BaseChatEngine,
         *,
-        name: str | None = "",
+        name: str = "Unnamed",
         **kwargs: dict,
     ):
         """Init params."""
         self.agent = agent
         self.semantic_highlighter = SemanticHighlighter()
-        name = name.capitalize() if name.islower() else name
-        self.name = f"Ragamuffin {name} Chat"
+        self.title = f"Ragamuffin {snake_to_title_case(name)} Chat"
 
     def get_modules(self) -> dict[str, Any]:
         """Get modules."""
@@ -47,10 +46,9 @@ class GradioAgentChatUI(BaseLlamaPack):
             ),
         )
         css_filename = Path(__file__).parent / "style.css"
-        title = snake_to_title_case(self.name)
 
         webui = gr.Blocks(
-            title=title,
+            title=self.title,
             theme=rafamuffin_theme,
             css_paths=[css_filename],
         )
@@ -58,7 +56,7 @@ class GradioAgentChatUI(BaseLlamaPack):
             with gr.Row():
                 # Left Column
                 with gr.Column(scale=3):
-                    gr.Markdown(f"### {title} 🐈")
+                    gr.Markdown(f"### {self.title} 🐈")
                     chat_window = gr.Chatbot(label="Conversation", elem_id="chatbot")
                     message = gr.Textbox(label="Write A Message")
                     with gr.Row():
@@ -92,7 +90,7 @@ class GradioAgentChatUI(BaseLlamaPack):
         """Handle the user submitted message. Clear message box, and append to the history."""
         return "", [*history, (user_message, "")]
 
-    def generate_response(self, chat_history: list[tuple[str, str]]) -> tuple[str, list[tuple[str, str]]]:
+    def generate_response(self, chat_history: list[tuple[str, str]]) -> Iterator[tuple[str, str]]:
         """Generate a response from the agent."""
         query = chat_history[-1][0]
         response = self.agent.stream_chat(query)
