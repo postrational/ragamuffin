@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ragamuffin"
-version = "0.3.1"
+version = "0.3.2"
 description = ""
 authors = ["Michal Karzynski <github@karzyn.com>"]
 readme = "README.md"
@@ -32,6 +32,7 @@ rich = "^13.9.3"
 scikit-learn = "^1.5.2"
 sentence-transformers = "^3.2.1"
 transformers = {extras = ["torch"], version = "^4.46.1"}
+gitpython = "^3.1.43"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.7.1"

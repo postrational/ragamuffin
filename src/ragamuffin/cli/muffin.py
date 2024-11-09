@@ -5,6 +5,7 @@ import click
 
 from ragamuffin.cli.utils import format_list
 from ragamuffin.libraries.files import LocalLibrary
+from ragamuffin.libraries.git_repo import GitLibrary
 from ragamuffin.libraries.zotero import ZoteroLibrary
 from ragamuffin.models.select import configure_llamaindex_embedding_model, get_llm_by_name
 from ragamuffin.settings import get_settings
@@ -62,6 +63,26 @@ def create_agent_from_zotero(collection: list[str], name: str) -> None:
     reader = library.get_reader()
 
     logger.info("Generating RAG embeddings...")
+    storage.generate_index(name, reader)
+
+    logger.info(f"Agent '{name}' created successfully.")
+    logger.info(f"Use this command to chat: muffin chat {name}")
+
+
+@generate.command(name="from_git")
+@click.argument("name")
+@click.argument("repo_url")
+@click.option("--ref", help="The branch, tag, or commit hash to checkout.")
+def create_agent_from_git(name: str, repo_url: str, ref: str | None) -> None:
+    """Create an agent from a Git repository."""
+    logger.info("Creating a chat agent from a Git repository...")
+
+    library = GitLibrary(git_repo=repo_url, ref=ref)
+
+    reader = library.get_reader()
+
+    logger.info("Generating RAG embeddings...")
+    storage = get_storage()
     storage.generate_index(name, reader)
 
     logger.info(f"Agent '{name}' created successfully.")
