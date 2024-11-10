@@ -1,8 +1,9 @@
-# Ragamuffin - Zotero Chat 🐈
+# Ragamuffin - Chat with your documents 🐈
 
-Ragamuffin is a [RAG][rag]-powered chat agent which can access your [Zotero][zotero] library.
+Ragamuffin is a [RAG][rag]-powered chat agent which can access documents, articles from your [Zotero][zotero] library
+and code from any GitHub repository.
 
-You can ask questions, and the agent will respond using information from documents in your collection.
+You can ask questions, and the agent will respond using information from documents in your library.
 It will also display the sources used to generate each answer.
 
 ![Zotero Chat](screenshot.png)
@@ -20,36 +21,60 @@ Ragamuffin requires Python 3.10 or higher. It's recommended to use a virtual env
 
     $ python3 -m venv venv
     $ source venv/bin/activate
-    (venv) $ pip install git+https://github.com/postrational/ragamuffin.git
+    (venv) $ pip install --upgrade git+https://github.com/postrational/ragamuffin.git
 
 ## Usage
 
-In order to use Ragamuffin, you need to generate a [Zotero API key][zotero-key] and an [OpenAI API key][openai-key].
-Set these as environment variables before running the chat agent. 
+In order to use Ragamuffin, you need to generate an [OpenAI API key][openai-key].
+Please set this as an environment variable before running the `muffin` commands. 
 
-    $ export ZOTERO_LIBRARY_ID=1234567
-    $ export ZOTERO_API_KEY=XXXX........
     $ export OPENAI_API_KEY=sk-proj-XXXX........
-
-### Generate a RAG index based on your Zotero library
-
-    (venv) $ muffin generate from_zotero zotero_agent
-
-This will generate a RAG index based on the papers in your Zotero library.
-
-Later, you can chat with Ragamuffin using the `muffin chat` command:
-
-    (venv) $ muffin chat zotero_agent
 
 ### Create a Chat Agent based on a directory of documents
 
-You can also generate a RAG index based on a directory of files (e.g. PDFs, EPUB, etc.).
+You can generate a RAG index based on a directory of files (e.g. TXT, PDF, EPUB, etc.).
 
 Use the `muffin` command to generate an agent named `my_agent` based on the documents in `/path/to/my/documents/`:
 
     (venv) $ muffin generate from_files my_agent /path/to/my/documents/
 
 Start the chat agent using the following command:
+
+    (venv) $ muffin chat my_agent
+
+### Generate a RAG index based on your Zotero library
+
+In order to use Ragamuffin with Zotero, you need to generate a [Zotero API key][zotero-key] and 
+an [OpenAI API key][openai-key]. Set these as environment variables before running `muffin`. 
+
+    $ export OPENAI_API_KEY=sk-proj-XXXX........
+    $ export ZOTERO_LIBRARY_ID=1234567
+    $ export ZOTERO_API_KEY=XXXX........
+    (venv) $ muffin generate from_zotero zotero_agent
+
+This will generate a RAG index based on all papers in your Zotero library.
+
+You can also create an agent for a specific collection in your Zotero library using the `--collection` option:
+
+    (venv) $ muffin generate from_zotero zotero_agent --collection "My Collection"
+
+Later, you can chat with Ragamuffin using the `muffin chat` command:
+
+    (venv) $ muffin chat zotero_agent
+
+### Generate a RAG index based on a Git repository
+
+If you want to learn about a specific codebase, you can generate a RAG index based on a GitHub repository.
+
+    (venv) $ muffin generate from_git my_agent https://github.com/postrational/ragamuffin/
+
+If you want to use a specific branch, tag or commit, you can use the `--ref` option:
+
+    (venv) $ muffin generate from_git poetry https://github.com/python-poetry/poetry --ref 1.8.4
+
+### Chat with the agent
+
+You can chat with the agent using the `muffin chat` command:
 
     (venv) $ muffin chat my_agent
 

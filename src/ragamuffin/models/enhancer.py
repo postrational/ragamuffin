@@ -4,7 +4,6 @@ from ragamuffin.settings import get_settings
 
 
 class QueryEnhancer:
-
     def __init__(self):
         settings = get_settings()
         llm_model = ensure_string(settings.get("llm_model"))

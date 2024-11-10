@@ -39,15 +39,14 @@ def create_agent_from_files(name: str, source_dir: str) -> None:
         source_dir: A directory containing the documents it will know.
     """
     logger.info(f"Creating a new chat agent '{name}' from '{source_dir}'.")
-    storage = get_storage()
 
+    storage = get_storage()
     library = LocalLibrary(library_dir=source_dir)
     reader = library.get_reader()
-
-    logger.info("Generating RAG embeddings...")
     storage.generate_index(name, reader)
 
     logger.info(f"Agent '{name}' created successfully.")
+    logger.info(f"Use this command to chat: muffin chat {name}")
 
 
 @generate.command(name="from_zotero")
@@ -63,9 +62,8 @@ def create_agent_from_zotero(collection: list[str], name: str) -> None:
     lib_id = ensure_string(settings.get("zotero_library_id"))
     api_key = ensure_string(settings.get("zotero_api_key"))
     library = ZoteroLibrary(library_id=lib_id, api_key=api_key, collections=collection)
-    reader = library.get_reader()
 
-    logger.info("Generating RAG embeddings...")
+    reader = library.get_reader()
     storage.generate_index(name, reader)
 
     logger.info(f"Agent '{name}' created successfully.")
@@ -82,10 +80,7 @@ def create_agent_from_git(name: str, repo_url: str, ref: str | None) -> None:
     logger.info("Creating a chat agent from a Git repository...")
 
     library = GitLibrary(git_repo=repo_url, ref=ref)
-
     reader = library.get_reader()
-
-    logger.info("Generating RAG embeddings...")
     storage = get_storage()
     storage.generate_index(name, reader)
 

@@ -44,6 +44,8 @@ class CassandraStorage(Storage):
         vector_store = CassandraVectorStore(table=agent_name, embedding_dimension=embed_dim)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         configure_llamaindex_embedding_model()
+
+        logger.info("Generating RAG embeddings...")
         index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
         index.storage_context.persist()
         return index

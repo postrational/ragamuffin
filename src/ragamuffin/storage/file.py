@@ -35,6 +35,7 @@ class FileStorage(Storage):
         configure_llamaindex_embedding_model()
 
         # Build the index from documents and persist to disk
+        logger.info("Generating RAG embeddings...")
         index = VectorStoreIndex.from_documents(documents)
         index.storage_context.persist(persist_dir=self.get_agent_storage_dir(agent_name))
         return index

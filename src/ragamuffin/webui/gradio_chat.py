@@ -133,8 +133,9 @@ class GradioAgentChatUI(BaseLlamaPack):
             filename_html = f"<a href='{url}' target='_blank'>{name}</a>" if url else f"<b>{name}</b>"
 
             # Append text and metadata to lists
-            if text_node.text:
-                sources_text.append(text_node.text)
+            node_content = text_node.get_content()
+            if node_content:
+                sources_text.append(node_content)
                 nodes_info.append(
                     {
                         "filename_html": filename_html,
@@ -150,8 +151,9 @@ class GradioAgentChatUI(BaseLlamaPack):
         # Construct the output using the highlighted texts and metadata
         for highlighted_text, info in zip(highlighted_texts, nodes_info, strict=False):
             source_footer = f"<br>Page {info['page']}" if info["page"] else "<br>"
-            similarity_class = int(min(score * 10, 9))
-            source_footer += f" <span class='badge similarity-{similarity_class}'>{info['score']:.2f}</span>"
+            if info["score"] is not None:
+                similarity_class = int(min(info["score"] * 10, 9))
+                source_footer += f" <span class='badge similarity-{similarity_class}'>{info['score']:.2f}</span>"
             output_html += f"<p><b>{info['filename_html']}</b><br>{highlighted_text}{source_footer}</p>"
 
         return output_html
