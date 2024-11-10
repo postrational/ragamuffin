@@ -6,7 +6,7 @@ from llama_index.core import StorageContext, VectorStoreIndex, load_index_from_s
 from llama_index.core.indices.base import BaseIndex
 from llama_index.core.readers.base import BaseReader
 
-from ragamuffin.models.select import configure_llamaindex_embedding_model
+from ragamuffin.models.model_picker import configure_llamaindex_embedding_model
 from ragamuffin.settings import get_settings
 from ragamuffin.storage.interface import Storage
 

@@ -8,7 +8,7 @@ from ragamuffin.error_handling import ensure_string, exit_on_error
 from ragamuffin.libraries.files import LocalLibrary
 from ragamuffin.libraries.git_repo import GitLibrary
 from ragamuffin.libraries.zotero import ZoteroLibrary
-from ragamuffin.models.select import configure_llamaindex_embedding_model, get_llm_by_name
+from ragamuffin.models.model_picker import configure_llamaindex_embedding_model, get_llm_by_name
 from ragamuffin.settings import get_settings
 from ragamuffin.storage.utils import get_storage
 

@@ -2,9 +2,9 @@ import logging
 
 from rich.logging import RichHandler
 
-from ragamuffin.settings import get_settings
+from ragamuffin import settings
 
-if get_settings().get("debug_mode"):
+if settings.get_settings().get("debug_mode"):
     logging.basicConfig(
         level="DEBUG", format="[%(name)s] %(message)s", datefmt="[%X]", handlers=[RichHandler(show_path=True)]
     )

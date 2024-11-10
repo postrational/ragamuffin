@@ -7,7 +7,9 @@ import gradio as gr
 from gradio.themes.utils import colors, fonts
 from llama_index.core.chat_engine.types import BaseChatEngine
 from llama_index.core.llama_pack import BaseLlamaPack
+from llama_index.core.schema import NodeWithScore
 
+from ragamuffin.models.enhancer import QueryEnhancer
 from ragamuffin.models.highlighter import SemanticHighlighter
 
 
@@ -22,6 +24,7 @@ class GradioAgentChatUI(BaseLlamaPack):
         """Init params."""
         self.agent = agent
         self.semantic_highlighter = SemanticHighlighter()
+        self.query_enhancer = QueryEnhancer()
         self.title = f"Ragamuffin {snake_to_title_case(name)} Chat"
 
     def get_modules(self) -> dict[str, Any]:
@@ -84,7 +87,7 @@ class GradioAgentChatUI(BaseLlamaPack):
         query = chat_history[-1]["content"]
         response = self.agent.stream_chat(query)
 
-        sources_html = self.generate_sources_html(query, response.sources)
+        sources_html = self.generate_sources_html(query, response.source_nodes)
 
         chat_history.append({"role": "assistant", "content": ""})
         for token in response.response_gen:
@@ -94,6 +97,13 @@ class GradioAgentChatUI(BaseLlamaPack):
     def accept_message(self, user_message: str, chat_history: list[dict]) -> tuple[str, list[dict]]:
         """Accept the user message."""
         chat_history.append({"role": "user", "content": user_message})
+        chat_history.append(
+            {
+                "role": "assistant",
+                "content": self.query_enhancer(chat_history),
+                "metadata": {"title": "🧠 Building semantic search query"},
+            }
+        )
         return "", chat_history
 
     def reset_chat(self) -> tuple[str, str, str]:
@@ -101,39 +111,37 @@ class GradioAgentChatUI(BaseLlamaPack):
         self.agent.reset()  # clear agent history
         return "", "", ""
 
-    def generate_sources_html(self, query: str, sources: list) -> str:
+    def generate_sources_html(self, query: str, source_nodes: list[NodeWithScore]) -> str:
         """Generate HTML for the sources."""
         output_html = ""
         sources_text = []
         nodes_info = []
 
-        if not sources:
+        if not source_nodes:
             return "<p>No sources found.</p>"
 
         # Collect all texts and their associated metadata
-        for source in sources:
-            source_nodes = source.raw_output.source_nodes if hasattr(source.raw_output, "source_nodes") else []
-            for node_with_score in source_nodes:
-                text_node = node_with_score.node
-                metadata = text_node.metadata
-                score = node_with_score.score
-                page = metadata.get("page_label")
+        for node_with_score in source_nodes:
+            text_node = node_with_score.node
+            metadata = text_node.metadata
+            score = node_with_score.score
+            page = metadata.get("page_label")
 
-                filename = metadata.get("file_name", "Unknown Filename")
-                name = metadata.get("name", filename)
-                url = metadata.get("url")
-                filename_html = f"<a href='{url}' target='_blank'>{name}</a>" if url else f"<b>{name}</b>"
+            filename = metadata.get("file_name", "Unknown Filename")
+            name = metadata.get("name", filename)
+            url = metadata.get("url")
+            filename_html = f"<a href='{url}' target='_blank'>{name}</a>" if url else f"<b>{name}</b>"
 
-                # Append text and metadata to lists
-                if text_node.text:
-                    sources_text.append(text_node.text)
-                    nodes_info.append(
-                        {
-                            "filename_html": filename_html,
-                            "page": page,
-                            "score": score,
-                        }
-                    )
+            # Append text and metadata to lists
+            if text_node.text:
+                sources_text.append(text_node.text)
+                nodes_info.append(
+                    {
+                        "filename_html": filename_html,
+                        "page": page,
+                        "score": score,
+                    }
+                )
 
         # Highlight the texts
         sources_text = [html.escape(text) for text in sources_text]
@@ -142,7 +150,8 @@ class GradioAgentChatUI(BaseLlamaPack):
         # Construct the output using the highlighted texts and metadata
         for highlighted_text, info in zip(highlighted_texts, nodes_info, strict=False):
             source_footer = f"<br>Page {info['page']}" if info["page"] else "<br>"
-            source_footer += f" ({info['score']:.2f})"
+            similarity_class = int(min(score * 10, 9))
+            source_footer += f" <span class='badge similarity-{similarity_class}'>{info['score']:.2f}</span>"
             output_html += f"<p><b>{info['filename_html']}</b><br>{highlighted_text}{source_footer}</p>"
 
         return output_html

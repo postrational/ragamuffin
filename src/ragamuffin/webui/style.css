@@ -7,6 +7,8 @@
     font-size: 12px;
     overflow: auto;
     overflow-x: hidden;
+    background-color: var(--background-fill-secondary);
+    border-radius: 0.5em;
 }
 
 #sources p {
@@ -29,9 +31,17 @@
     text-decoration: underline;
 }
 
-a:visited {
+#sources a:visited {
     color: var(--link-text-color-visited) !important;
     text-decoration: none;
+}
+
+.badge {
+    background-color: #28a745;
+    color: var(--block-label-text-color);
+    padding: 0.2em 0.4em;
+    border-radius: 0.2em;
+    font-size: 0.9em;
 }
 
 /*.similarity-0 { background-color: rgba(0, 255, 255, 0.1); }*/
