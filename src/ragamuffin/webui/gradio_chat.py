@@ -1,5 +1,5 @@
 import html
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Generator
 from pathlib import Path
 from typing import Any
 
@@ -57,7 +57,7 @@ class GradioAgentChatUI(BaseLlamaPack):
                 # Left Column
                 with gr.Column(scale=3):
                     gr.Markdown(f"### {self.title} 🐈")
-                    chat_window = gr.Chatbot(label="Conversation", elem_id="chatbot")
+                    chat_window = gr.Chatbot(label="Conversation", elem_id="chatbot", type="messages")
                     message = gr.Textbox(label="Write A Message")
                     with gr.Row():
                         clear = gr.ClearButton()
@@ -69,37 +69,32 @@ class GradioAgentChatUI(BaseLlamaPack):
 
             def apply_submit_action(component_action: Callable) -> None:
                 component_action(
-                    self.handle_user_message,
-                    inputs=[message, chat_window],
-                    outputs=[message, chat_window],
-                    queue=False,
-                ).then(
-                    self.generate_response,
-                    inputs=chat_window,
-                    outputs=[chat_window, console],
-                )
+                    self.accept_message, inputs=[message, chat_window], outputs=[message, chat_window]
+                ).then(self.respond, inputs=[chat_window], outputs=[chat_window, console])
 
             # Apply actions
             apply_submit_action(message.submit)
             apply_submit_action(submit.click)
             clear.click(self.reset_chat, None, [message, chat_window, console])
 
-        webui.launch(inbrowser=True)
+        webui.launch(inbrowser=True, share=False)
 
-    def handle_user_message(self, user_message: str, history: list[str]) -> tuple[str, list[str]]:
-        """Handle the user submitted message. Clear message box, and append to the history."""
-        return "", [*history, (user_message, "")]
-
-    def generate_response(self, chat_history: list[tuple[str, str]]) -> Iterator[tuple[str, str]]:
-        """Generate a response from the agent."""
-        query = chat_history[-1][0]
+    def respond(self, chat_history: list[dict]) -> Generator[tuple[list[dict], str], None, None]:
+        """Respond to the user message."""
+        query = chat_history[-1]["content"]
         response = self.agent.stream_chat(query)
 
         sources_html = self.generate_sources_html(query, response.sources)
 
+        chat_history.append({"role": "assistant", "content": ""})
         for token in response.response_gen:
-            chat_history[-1][1] += token
+            chat_history[-1]["content"] += token
             yield chat_history, str(sources_html)
+
+    def accept_message(self, user_message: str, chat_history: list[dict]) -> tuple[str, list[dict]]:
+        """Accept the user message."""
+        chat_history.append({"role": "user", "content": user_message})
+        return "", chat_history
 
     def reset_chat(self) -> tuple[str, str, str]:
         """Reset the agent's chat history. And clear all dialogue boxes."""
@@ -130,14 +125,15 @@ class GradioAgentChatUI(BaseLlamaPack):
                 filename_html = f"<a href='{url}' target='_blank'>{name}</a>" if url else f"<b>{name}</b>"
 
                 # Append text and metadata to lists
-                sources_text.append(text_node.text)
-                nodes_info.append(
-                    {
-                        "filename_html": filename_html,
-                        "page": page,
-                        "score": score,
-                    }
-                )
+                if text_node.text:
+                    sources_text.append(text_node.text)
+                    nodes_info.append(
+                        {
+                            "filename_html": filename_html,
+                            "page": page,
+                            "score": score,
+                        }
+                    )
 
         # Highlight the texts
         sources_text = [html.escape(text) for text in sources_text]
