@@ -30,7 +30,7 @@ Please set this as an environment variable before running the `muffin` commands.
 
     $ export OPENAI_API_KEY=sk-proj-XXXX........
 
-### Create a Chat Agent based on a directory of documents
+### Create a chat agent based on a directory of documents
 
 You can generate a RAG index based on a directory of files (e.g. TXT, PDF, EPUB, etc.).
 
@@ -42,7 +42,7 @@ Start the chat agent using the following command:
 
     (venv) $ muffin chat my_agent
 
-### Generate a RAG index based on your Zotero library
+### Create a chat agent based on your Zotero library
 
 In order to use Ragamuffin with Zotero, you need to generate a [Zotero API key][zotero-key] and 
 an [OpenAI API key][openai-key]. Set these as environment variables before running `muffin`. 
@@ -62,7 +62,7 @@ Later, you can chat with Ragamuffin using the `muffin chat` command:
 
     (venv) $ muffin chat zotero_agent
 
-### Generate a RAG index based on a Git repository
+### Create a chat agent based on a Git repository
 
 If you want to learn about a specific codebase, you can generate a RAG index based on a GitHub repository.
 

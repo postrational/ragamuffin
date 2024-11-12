@@ -37,15 +37,17 @@ class CassandraStorage(Storage):
     def generate_index(self, agent_name: str, reader: BaseReader) -> BaseIndex:
         """Load the documents and create a RAG index."""
         self._validate_agent_name(agent_name)
+        logger.info("Loading documents...")
         documents = reader.load_data()
 
+        logger.info("Generating RAG embeddings...")
         settings = get_settings()
         embed_dim = ensure_int(settings.get("embedding_dimension"))
         vector_store = CassandraVectorStore(table=agent_name, embedding_dimension=embed_dim)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         configure_llamaindex_embedding_model()
 
-        logger.info("Generating RAG embeddings...")
+        logger.info("Storing the index in Cassandra...")
         index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
         index.storage_context.persist()
         return index

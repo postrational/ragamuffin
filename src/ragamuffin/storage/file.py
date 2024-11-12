@@ -29,6 +29,7 @@ class FileStorage(Storage):
 
     def generate_index(self, agent_name: str, reader: BaseReader) -> BaseIndex:
         """Load the documents and create a RAG index."""
+        logger.info("Loading documents...")
         documents = reader.load_data()
 
         # Configure chunking settings
@@ -37,6 +38,7 @@ class FileStorage(Storage):
         # Build the index from documents and persist to disk
         logger.info("Generating RAG embeddings...")
         index = VectorStoreIndex.from_documents(documents)
+        logger.info("Storing the index in the file system...")
         index.storage_context.persist(persist_dir=self.get_agent_storage_dir(agent_name))
         return index
 

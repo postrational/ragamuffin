@@ -28,7 +28,7 @@ def get_embedding_model_by_name(name: str) -> BaseEmbedding:
     except ValueError as e:
         raise ConfigurationError(f"Unrecognized embedding model name: {name}") from e
 
-    if provider == "huggingface":
+    if provider == "huggingface.co":
         return HuggingFaceEmbedding(model_name=model_name)
 
     if provider == "openai":
