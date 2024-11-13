@@ -41,16 +41,7 @@ def test_muffin_cli_from_git(caplog, storage_type):
         caplog.set_level(logging.INFO, logger="ragamuffin")
         agent_name = "test_agent"
 
-        result = runner.invoke(
-            cli,
-            [
-                "generate",
-                "from_git",
-                agent_name,
-                "https://github.com/postrational/ragamuffin/",
-                "--ref=5e98d0dee031d4cb0ed4b87067021beec8cf0921",
-            ],
-        )
+        result = runner.invoke(cli, ["generate", "from_git", agent_name, "https://github.com/octocat/Hello-World/"])
         assert result.exit_code == 0
         assert agent_name in get_storage().list_agents()
 
