@@ -11,6 +11,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-24.04
+    services:
+      cassandra:
+        image: cassandra
+        ports:
+          - 9042:9042
 
     steps:
       - name: Checkout repository
@@ -26,9 +31,21 @@ jobs:
           pip install poetry
           poetry install
 
-      - name: Run tests
+      - name: Linting and formatting checks
         run: |
           poetry run ruff format --check src
           poetry run ruff check src
+
+      - name: Static type checking
+        run: |
           poetry run mypy src
+
+      - name: Create Cassandra keyspace
+        run: |
+          docker exec ${{ job.services.cassandra.id }} cqlsh localhost 9042 \
+            --execute "CREATE KEYSPACE ragamuffin WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
+
+      - name: Run tests
+        run: |
           poetry run muffin --version
+          poetry run pytest --cov=ragamuffin tests
