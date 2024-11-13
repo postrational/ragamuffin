@@ -48,4 +48,4 @@ jobs:
       - name: Run tests
         run: |
           poetry run muffin --version
-          poetry run pytest --cov=ragamuffin tests
+          poetry run pytest -v --cov=ragamuffin tests
